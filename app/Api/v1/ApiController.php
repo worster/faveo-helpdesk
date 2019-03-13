@@ -1029,7 +1029,7 @@ class ApiController extends Controller
             $thread = $this->thread->create(['ticket_id' => $ticketid, 'user_id' => $userid, 'is_internal' => 1, 'body' => $body]);
 
             return response()->json(compact('thread'));
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             $error = $e->getMessage();
             $line = $e->getLine();
             $file = $e->getFile();
@@ -1418,7 +1418,7 @@ class ApiController extends Controller
             $collaborator = $this->ticket->userremove();
 
             return response()->json(compact('collaborator'));
-        } catch (\Exception $ex) {
+        } catch (\Exception $e) {
             $error = $e->getMessage();
             $line = $e->getLine();
             $file = $e->getFile();

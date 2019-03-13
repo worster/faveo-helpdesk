@@ -49,7 +49,7 @@ return [
      */
     'login_to_start_your_session'                                            => '登陆去启动你的会话',
     'login'                                                                  => '登陆',
-    'remember'                                                               => '登陆',
+    'remember'                                                               => '记住我',
     'signmein'                                                               => '登陆标志',
     'iforgot'                                                                => '忘记密码',
     'email_address'                                                          => '邮箱地址',
@@ -57,7 +57,6 @@ return [
     'password_confirmation'                                                  => '确认密码',
     'woops'                                                                  => 'Whoops!',
     'theirisproblem'                                                         => '检查文本框输入值是否正确.',
-    'login'                                                                  => '登陆',
     'e-mail'                                                                 => '邮箱',
     'reg_new_member'                                                         => '注册一个会员',
     'this_account_is_currently_inactive'                                     => '这个账号还为激活!',
@@ -145,8 +144,8 @@ return [
     'port_number'                                                                                 => '端口',
     'mail_box_protocol'                                                                           => '邮箱协议',
     'authentication_required'                                                                     => '必须认证',
-    'yes'                                                                                         => 'Yes',
-    'no'                                                                                          => 'No',
+    'yes'                                                                                         => '确定',
+    'no'                                                                                          => '不了',
     'header_spoofing'                                                                             => '头欺骗',
     'allow_for_this_email'                                                                        => '允许这封邮件',
     'imap_config'                                                                                 => 'IMAP 配置',
@@ -362,10 +361,10 @@ return [
       |   Ticket Settings Page
       |--------------------------------------
      */
-    'ticket'                                                     => '票券',
-    'ticket-setting'                                             => '票券设置',
-    'default_ticket_number_format'                               => '默认票券数量形式',
-    'default_ticket_number_sequence'                             => '默认票券号码序列',
+    'ticket'                                                     => '工单',
+    'ticket-setting'                                             => '工单设置',
+    'default_ticket_number_format'                               => '默认工单数量形式',
+    'default_ticket_number_sequence'                             => '默认工单号码序列',
     'default_status'                                             => '默认状态',
     'default_priority'                                           => '默认优先级',
     'default_sla'                                                => '默认SLA',
@@ -374,10 +373,10 @@ return [
     'agent_collision_avoidance_duration'                         => '代理冲突避免持续时间',
     'human_verification'                                         => '人类验证',
     'claim_on_response'                                          => '要求响应',
-    'assigned_tickets'                                           => '分配票券',
-    'answered_tickets'                                           => '答复票券',
+    'assigned_tickets'                                           => '分配工单',
+    'answered_tickets'                                           => '答复工单',
     'agent_identity_masking'                                     => '代理身份屏蔽',
-    'enable_HTML_ticket_thread'                                  => '启用HTML票券线',
+    'enable_HTML_ticket_thread'                                  => '启用HTML工单线',
     'allow_client_updates'                                       => '允许客户端更新',
     'lock_ticket_frequency'                                      => '锁票频率',
     'only-once'                                                  => '仅有一次',
@@ -455,6 +454,7 @@ return [
     'Send_app_crash_reports_to_help_Ladybird_improve_Faveo' => '发送应用程序崩溃报告帮助ladybird改进Faveo',
     'alert_&_notices_updated_successfully'                  => '警告和通知更新成功',
     'alert_&_notices_can_not_updated'                       => '警告和通知不能更新',
+
     /*
       |-----------------------------------------------
       | Ratings Settings
@@ -462,12 +462,14 @@ return [
      */
     'current_ratings' => '当前等级',
     'edit_ratings'    => '编辑等级',
+    
     /*
       |-------------------------------------------------
       |Social login
       |--------------------------------------------------
      */
     'social-login' => '社会化登陆',
+    
     /*
       |------------------------------------------------
       | Language page
@@ -497,6 +499,7 @@ return [
     'active-lang-error'  => '语言包在激活状态下无法删除.',
     'language-error'     => '语言包在目录中未发现.',
     'lang-fallback-lang' => '不能删除系统备用的语言包',
+    
     /*
       |--------------------------------------
       | Plugin Settings
@@ -642,6 +645,7 @@ return [
     'workflow_created_successfully'                        => '工作流创建成功',
     'workflow_updated_successfully'                        => '工作流更新成功',
     'workflow_deleted_successfully'                        => '工作流删除成功',
+    
     /*
       |--------------------------------------
       |  Form Create Page
@@ -659,6 +663,7 @@ return [
     'delete_from'                             => '删除表单',
     'are_you_sure_you_want_to_delete'         => '你确信你想要删除表单吗',
     'close'                                   => '关闭',
+    'resolve'                                 => '解决',
     'instructions'                            => '说明',
     'instructions_on_creating_form'           => '选择要添加到下面表单的字段类型，然后单击“类型”下拉。如果类型是select、checkbox或radio，不要忘记设置字段选项。用逗号分隔每个选项。完成创建表单后，可以单击“save form”按钮保存表单',
     'form_properties'                         => '表单属性',
@@ -682,12 +687,12 @@ return [
     'category_not_updated'                    => '不能更新分类',
     'category_deleted_successfully'           => '分类删除成功',
     'category_not_deleted'                    => '分类不能删除',
-    'article_inserted_successfully'           => '',
-    'article_not_inserted'                    => '文章插入成功',
-    'article_updated_successfully'            => '不能插入文章',
-    'article_not_updated'                     => '文章更新成功',
-    'article_deleted_successfully'            => '不能更新文章',
-    'article_not_deleted'                     => '文章删除成功',
+    'article_inserted_successfully'           => '文章插入成功',
+    'article_not_inserted'                    => '不能插入文章',
+    'article_updated_successfully'            => '文章更新成功',
+    'article_not_updated'                     => '不能更新文章',
+    'article_deleted_successfully'            => '文章删除成功',
+    'article_not_deleted'                     => '不能删除文章',
     'article_can_not_deleted'                 => '文章不能被删除',
     'page_created_successfully'               => '页面创建成功',
     'your_page_updated_successfully'          => '页面更新成功',
@@ -794,6 +799,7 @@ return [
     'list_of_agents'                          => '列出代理',
     'create_an_agent'                         => '创建代理',
     'edit_an_agent'                           => '编辑代理',
+
     /*
       |--------------------------------------
       |  Department Create Page
@@ -953,11 +959,13 @@ return [
     'trash-delete-ticket'                                                                    => '永久删除工单',
     'trash-delete-title-msg'                                                                 => '点击这里永久删除工单.',
     'moved_to_trash'                                                                         => '移动选择的工单到回收站.',
-    'tickets_have_been_closed'                                                               => '关闭选择的工单.',
-    'tickets_have_been_opened'                                                               => '打开选择的工单.',
+    'tickets_have_been_closed'                                                               => '选中的工单已经被关闭.',
+    'tickets_have_been_resolved'                                                             => '选中的工单已经被标记为已解决.',
+    'tickets_have_been_opened'                                                               => '选中的工单已经被打开.',
     'unable_to_fetch_emails'                                                                 => '无法获取邮件',
     'reply_content_is_a_required_field'                                                      => '回复内容是一个必填字段',
     'internal_content_is_a_required_field'                                                   => '内部内容是必填字段',
+
     /*
       |-----------------------------------------------
       |  Profile
@@ -1115,6 +1123,7 @@ return [
     'access-ticket'                                    => '警告!此工单已被锁定 ',
     'minutes'                                          => ' 分钟',
     'in_minutes'                                       => '在几分钟内',
+    'change-owner'                                     => '变更拥有人',
     'add_another_owner'                                => '添加一个拥有人',
     'user-not-found'                                   => '未找到的用户或用户是不活动的。再次尝试或添加一个新用户.',
     'change-success'                                   => '成功!这张工单的所属人已经换了.',
@@ -1141,6 +1150,7 @@ return [
     'overdue'                                          => '过期的',
     'overdue-tickets'                                  => '过期的工单',
     'change_owner_for_ticket'                          => '改变工单拥有者',
+
     /*
       |------------------------------------------------
       |Tools Page
@@ -1192,6 +1202,7 @@ return [
     'activate_this_set'         => '激活设置',
     'show'                      => '显示',
     'no_notification_available' => '没有通知',
+
     //auto-close workflow
     'close-msg1'                                          => '工单自动关闭后的天数.',
     'no_of_days'                                          => '没几天',
@@ -1241,6 +1252,7 @@ return [
     'display_order'                        => '显示排序',
     'rating_scale'                         => '等计量表',
     'rating_area'                          => '等级区域',
+
     'modify'                               => '更改',
     'rating_name'                          => '评级名字',
     'add_user_to_this_organization'        => '增加用户到组织',
@@ -1251,9 +1263,11 @@ return [
     'security_settings_saved_successfully' => '安全设置保存成功',
     'manage_status'                        => '管理状态',
     'notifications'                        => '通知',
+
     'auto_close_workflow'                  => '自动关闭工作流',
     'close_ticket_workflow_settings'       => '关闭工单工作流设置',
     'successfully_saved_your_settings'     => '成功保存你的设置',
+
     /*
       |------------------------------------------------
       |   Notification Settings Pages
@@ -1398,14 +1412,14 @@ return [
      * --------------------------------------------------------------------------
      *
      */
-    'error-debug'                                                                      => '错误日志与debug',
-    'debug-options'                                                                    => 'debug 选项',
+    'error-debug'                                                                      => '错误日志与调试',
+    'debug-options'                                                                    => '调试选项',
     'view-logs'                                                                        => '查看错误日志',
     'not-authorised-error-debug'                                                       => '你无权访问URl',
-    'error-debug-settings'                                                             => '错误与debug设置',
-    'debugging'                                                                        => 'debug模式',
+    'error-debug-settings'                                                             => '错误与调试设置',
+    'debugging'                                                                        => '调试模式',
     'bugsnag-debugging'                                                                => '发送应用崩溃报告，帮助瓢虫改善Faveo',
-    'error-debug-settings-saved-message'                                               => '错误与debug配置保存成功',
+    'error-debug-settings-saved-message'                                               => '错误与调试配置保存成功',
     'error-debug-settings-error-message'                                               => '你没做任何改变.',
     'error-logs'                                                                       => '错误日志',
     /* ---------------------------------------------------------------------------------------
@@ -1491,6 +1505,7 @@ return [
     'user_priority_status'                                                             => '用户优先级状态',
     'current'                                                                          => '当前:',
     'active_user_can_select_the_priority_while_creating_ticket'                        => '活动用户可以在创建票据时选择优先级',
+
     /* --------------------------------------------------------------------------------------------
      * Approval Updated
      * --------------------------------------------------------------------------------------------
@@ -1500,9 +1515,11 @@ return [
     'approve'                                => '批准',
     'approval_request'                       => '批准请求',
     'approvel_ticket_list'                   => '批准工单列表',
+    
     'approval_settings'                      => '批准设置',
     'close_all_ticket_for_approval'          => '关闭所有批准的工单',
     'approval_settings-created-successfully' => '批准设置创建成功',
+
     /* --------------------------------------------------------------------------------------------
      * Followup Updated
      * --------------------------------------------------------------------------------------------
@@ -1510,6 +1527,7 @@ return [
     'followup'              => '跟踪',
     'followup_tickets'      => '追踪工单',
     'followup_Notification' => '后续通知',
+
     /*
      * --------------------------------------------------------------------------------------------
      * Updated 6-9-2016
@@ -1546,8 +1564,10 @@ return [
     'deleted_user_directory'                                       => '删除用户目录',
     'restore'                                                      => '修复',
     'user_restore_successfully'                                    => '用户修复成功',
+
     /*     * * updates 7-6-2018** */
     'apply' => 'Apply',
+
     /* updates 7-6-2018 * */
     'sort-by'                      => '排序',
     'created-at'                   => '创建在',
@@ -1567,6 +1587,7 @@ return [
     'restore-user'                 => '修复用户账号',
     'delete-account-caution-info'  => '请注意，这个帐户可能在系统中仍然有打开的工单.',
     'reply-can-not-be-empty'       => '回复是空的，请输入回复消息.',
+
     //update 18-12-2016
     'account-created-contact-admin-as-we-were-not-able-to-send-opt' => '你的账户创建成功.请联系管理员去激活.',
     //update 19-12-2016
@@ -1709,4 +1730,12 @@ return [
     'ticket_type_updated_successfully' => '工单类型更新成功',
     'ticket_type_deleted_successfully' => '工单类型删除成功',
     'create_new_ticket'                => '创建工单',
+
+    //update since v1.10
+    'not-answered'                                 => '未回复的',
+    'filtered-results'                             => '已过滤的结果',
+    'confirm-to-proceed'                           => '确定么？',
+    'change-ticket-status-to'                      => '将工单的状态变更为 ',
+    'reload-be-patient-message'                    => '正在刷新页面，请耐心等待。',
+    'status-changed-successfully'                  => '成功变更状态。',
 ];

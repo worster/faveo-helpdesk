@@ -12,8 +12,8 @@
     <tr>
       <td>
         <i class="fa fa-folder-o"></i>
-        <a class="folder-item pointer" data-id="{{ $dir_name['long'] }}">
-          {{ $dir_name['short'] }}
+        <a class="folder-item pointer" data-id="{{ $dir_name->path }}">
+          {{ $dir_name->name }}
         </a>
       </td>
       <td></td>
@@ -29,10 +29,10 @@
         @if($type == 'Images')
         <i class="fa fa-image"></i>
         @else
-        <i class="fa {{ $file['icon'] }}"></i>
+        <i class="fa {{ $file->icon }}"></i>
         @endif
-        <?php $file_name = $file['name'];?>
-        <a href="javascript:useFile('{{ $file_name }}')">
+        <?php $file_name = $file->name;?>
+        <a href="javascript:useFile('{{ $file->url }}')">
           {{ $file_name }}
         </a>
         &nbsp;&nbsp;
@@ -41,13 +41,13 @@
         </a>
       </td>
       <td>
-        {{ $file['size'] }}
+        {{ $file->size }}
       </td>
       <td>
-        {{ $file['type'] }}
+        {{ $file->type }}
       </td>
       <td>
-        {{ date("Y-m-d h:m", $file['created']) }}
+        {{ date("Y-m-d h:m", $file->updated) }}
       </td>
       <td>
         <a href="javascript:trash('{{ $file_name }}')">

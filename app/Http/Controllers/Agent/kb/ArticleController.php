@@ -23,6 +23,8 @@ use Illuminate\Http\Request;
 use Lang;
 use Redirect;
 
+use Ramsey\Uuid\Uuid;
+
 /**
  * ArticleController
  * This controller is used to CRUD Articles.
@@ -153,27 +155,33 @@ class ArticleController extends Controller
      */
     public function store(Article $article, ArticleRequest $request)
     {
-        // requesting the values to store article data
-        $publishTime = $request->input('year').'-'.$request->input('month').'-'.$request->input('day').' '.$request->input('hour').':'.$request->input('minute').':00';
-
-        $sl = $request->input('name');
-        $slug = str_slug($sl, '-');
-        $article->slug = $slug;
-        $article->publish_time = $publishTime;
-        $article->fill($request->except('created_at', 'slug'))->save();
-        // creating article category relationship
-        $requests = $request->input('category_id');
-        $id = $article->id;
-
-        foreach ($requests as $req) {
-            DB::insert('insert into kb_article_relationship (category_id, article_id) values (?,?)', [$req, $id]);
-        }
-        /* insert the values to the article table  */
         try {
+            // requesting the values to store article data
+            $publishTime = $request->input('year').'-'.$request->input('month').'-'.$request->input('day').' '.$request->input('hour').':'.$request->input('minute').':00';
+
+            $sl = $request->input('name');
+            $slug = ""; // str_slug($sl, '-');
+            if (!$slug) { // sometimes we may failed to get slug from article name 
+                $slug = 'slug-' . Uuid::uuid1();
+            }
+            $article->slug = $slug;
+            $article->publish_time = $publishTime;
+            $article->fill($request->except('created_at', 'slug'))->save();
+            // creating article category relationship
+            $requests = $request->input('category_id');
+            $id = $article->id;
+        
+            /* insert the values to the article table  */
             $article->fill($request->except('slug'))->save();
 
+            foreach ($requests as $req) {
+                DB::insert('insert into kb_article_relationship (category_id, article_id) values (?,?)', [$req, $id]);
+            }
+
             return redirect('article')->with('success', Lang::get('lang.article_inserted_successfully'));
+
         } catch (Exception $e) {
+
             return redirect('article')->with('fails', Lang::get('lang.article_not_inserted').'<li>'.$e->getMessage().'</li>');
         }
     }

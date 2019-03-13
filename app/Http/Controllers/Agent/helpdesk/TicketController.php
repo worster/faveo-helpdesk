@@ -881,7 +881,7 @@ class TicketController extends Controller
     {
         $priority = '1';
 
-        return $prioirty;
+        return $priority;
     }
 
     /**
@@ -1720,67 +1720,152 @@ class TicketController extends Controller
      */
     public function select_all()
     {
+        $value = Input::get('submit');
+
+        if ($value == lang::get('lang.delete')) {
+            return $this->deleteSelected();
+        } elseif ($value == lang::get('lang.close')) {
+            return $this->closeSelected();
+        } elseif ($value == lang::get('lang.resolve')) {
+            return $this->resolveSelected();
+        } elseif ($value == lang::get('lang.open')) {
+            return $this->openSelected();
+        } elseif ($value == lang::get('lang.clean-up')) {
+            return $this->hardDeleteSelected();
+        } else {
+            $message = ['Invalid action'];
+            return response()->json(compact('message'), 404);
+        }
+
+        return redirect()->back()->with('fails', 'None Selected!');
+    }
+
+    /**
+     * delete selected tickets
+     *
+     * @return type
+     */
+    public function deleteSelected()
+    {
         if (Input::has('select_all')) {
             $selectall = Input::get('select_all');
-            $value = Input::get('submit');
+            foreach ($selectall as $selected) {
+                $ticket = Tickets::whereId($selected)->first();
+                $this->delete($selected, new Tickets());
+            }
+            return redirect()->back()->with('success', lang::get('lang.moved_to_trash'));
+        }
+
+        return redirect()->back()->with('fails', 'None Selected!');
+    }
+
+    /**
+     * close selected tickets
+     *
+     * @return type
+     */
+    public function closeSelected()
+    {
+        if (Input::has('select_all')) {
+            $selectall = Input::get('select_all');
+            foreach ($selectall as $selected) {
+                $ticket = Tickets::whereId($selected)->first();
+                $this->close($selected, new Tickets());
+            }
+            return redirect()->back()->with('success', Lang::get('lang.tickets_have_been_closed'));
+        }
+
+        return redirect()->back()->with('fails', 'None Selected!');
+    }
+
+    /**
+     * resolve selected tickets
+     *
+     * @return type
+     */
+    public function resolveSelected()
+    {
+        if (Input::has('select_all')) {
+            $selectall = Input::get('select_all');
+            foreach ($selectall as $selected) {
+                $ticket = Tickets::whereId($selected)->first();
+                $this->resolve($selected, new Tickets());
+            }
+            return redirect()->back()->with('success', Lang::get('lang.tickets_have_been_resolved'));
+        }
+
+        return redirect()->back()->with('fails', 'None Selected!');
+    }
+
+    /**
+     * open selected tickets
+     *
+     * @return type
+     */
+    public function openSelected()
+    {
+        if (Input::has('select_all')) {
+            $selectall = Input::get('select_all');
+            foreach ($selectall as $selected) {
+                $ticket = Tickets::whereId($selected)->first();
+                $this->open($selected, new Tickets());
+            }
+            return redirect()->back()->with('success', Lang::get('lang.tickets_have_been_opened'));
+        }
+
+        return redirect()->back()->with('fails', 'None Selected!');
+    }
+
+    /**
+     * delete selected tickets forever
+     *
+     * @return type
+     */
+    public function hardDeleteSelected()
+    {
+        if (Input::has('select_all')) {
+            $selectall = Input::get('select_all');
             foreach ($selectall as $delete) {
                 $ticket = Tickets::whereId($delete)->first();
-                if ($value == 'Delete') {
-                    $this->delete($delete, new Tickets());
-                } elseif ($value == 'Close') {
-                    $this->close($delete, new Tickets());
-                } elseif ($value == 'Resolve') {
-                    $this->resolve($delete, new Tickets());
-                } elseif ($value == 'Open') {
-                    $this->open($delete, new Tickets());
-                } elseif ($value == 'Delete forever') {
-                    $notification = Notification::select('id')->where('model_id', '=', $ticket->id)->get();
-                    foreach ($notification as $id) {
-                        $user_notification = UserNotification::where(
-                                        'notification_id', '=', $id->id);
-                        $user_notification->delete();
-                    }
-                    $notification = Notification::select('id')->where('model_id', '=', $ticket->id);
-                    $notification->delete();
-                    $thread = Ticket_Thread::where('ticket_id', '=', $ticket->id)->get();
-                    foreach ($thread as $th_id) {
-                        // echo $th_id->id." ";
-                        $attachment = Ticket_attachments::where('thread_id', '=', $th_id->id)->get();
-                        if (count($attachment)) {
-                            foreach ($attachment as $a_id) {
-                                // echo $a_id->id . ' ';
-                                $attachment = Ticket_attachments::find($a_id->id);
-                                $attachment->delete();
-                            }
-                            // echo "<br>";
-                        }
-                        $thread = Ticket_Thread::find($th_id->id);
-//                        dd($thread);
-                        $thread->delete();
-                    }
-                    $collaborators = Ticket_Collaborator::where('ticket_id', '=', $ticket->id)->get();
-                    if (count($collaborators)) {
-                        foreach ($collaborators as $collab_id) {
-                            // echo $collab_id->id;
-                            $collab = Ticket_Collaborator::find($collab_id->id);
-                            $collab->delete();
-                        }
-                    }
-                    $tickets = Tickets::find($ticket->id);
-                    $tickets->delete();
-                    $data = ['id' => $ticket->id];
-                    \Event::fire('ticket-permanent-delete', [$data]);
+                $notification = Notification::select('id')->where('model_id', '=', $ticket->id)->get();
+                foreach ($notification as $id) {
+                    $user_notification = UserNotification::where(
+                                    'notification_id', '=', $id->id);
+                    $user_notification->delete();
                 }
+                $notification = Notification::select('id')->where('model_id', '=', $ticket->id);
+                $notification->delete();
+                $thread = Ticket_Thread::where('ticket_id', '=', $ticket->id)->get();
+                foreach ($thread as $th_id) {
+                    // echo $th_id->id." ";
+                    $attachment = Ticket_attachments::where('thread_id', '=', $th_id->id)->get();
+                    if (count($attachment)) {
+                        foreach ($attachment as $a_id) {
+                            // echo $a_id->id . ' ';
+                            $attachment = Ticket_attachments::find($a_id->id);
+                            $attachment->delete();
+                        }
+                        // echo "<br>";
+                    }
+                    $thread = Ticket_Thread::find($th_id->id);
+//                        dd($thread);
+                    $thread->delete();
+                }
+                $collaborators = Ticket_Collaborator::where('ticket_id', '=', $ticket->id)->get();
+                if (count($collaborators)) {
+                    foreach ($collaborators as $collab_id) {
+                        // echo $collab_id->id;
+                        $collab = Ticket_Collaborator::find($collab_id->id);
+                        $collab->delete();
+                    }
+                }
+                $tickets = Tickets::find($ticket->id);
+                $tickets->delete();
+                $data = ['id' => $ticket->id];
+                \Event::fire('ticket-permanent-delete', [$data]);
             }
-            if ($value == 'Delete') {
-                return redirect()->back()->with('success', lang::get('lang.moved_to_trash'));
-            } elseif ($value == 'Close') {
-                return redirect()->back()->with('success', Lang::get('lang.tickets_have_been_closed'));
-            } elseif ($value == 'Open') {
-                return redirect()->back()->with('success', Lang::get('lang.tickets_have_been_opened'));
-            } else {
-                return redirect()->back()->with('success', Lang::get('lang.hard-delete-success-message'));
-            }
+
+            return redirect()->back()->with('success', Lang::get('lang.hard-delete-success-message'));
         }
 
         return redirect()->back()->with('fails', 'None Selected!');
@@ -2775,7 +2860,7 @@ class TicketController extends Controller
                         })
                         ->editColumn('a_uname', function ($tickets) {
                             if ($tickets->assigned_to == null && $tickets->name == null) {
-                                return "<span style='color:red'>Unassigned</span>";
+                                return "<span style='color:red'>" . Lang::get('lang.unassigned') . "</span>";
                             } else {
                                 $assign = $tickets->assign_user_name;
                                 if ($tickets->assigned_to != null) {
@@ -3017,7 +3102,7 @@ class TicketController extends Controller
 
             return view('themes.default1.agent.helpdesk.followup.followup', compact('table'));
         } catch (Exception $e) {
-            return Redirect()->back()->with('fails', $e->getMessage());
+            return redirect()->back()->with('fails', $e->getMessage());
         }
     }
 
@@ -3096,7 +3181,7 @@ class TicketController extends Controller
             })
             ->addColumn('assign_user_name', function ($tickets) {
                 if ($tickets->assigned_to == null) {
-                    return "<span style='color:red'>Unassigned</span>";
+                    return "<span style='color:red'>" . Lang::get('lang.unassigned') . "</span>";
                 } else {
                     $assign = $tickets->assign_user_name;
                     $url = route('user.show', $tickets->assigned_to);

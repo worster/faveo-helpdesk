@@ -63,7 +63,9 @@ trait LfmHelpers
      */
     public function getFileUrl($image_name = null, $is_thumb = null)
     {
-        return url($this->composeSegments('url', $is_thumb, $image_name));
+        return $this->removeIndexPath(
+            url($this->composeSegments('url', $is_thumb, $image_name))
+        );
     }
 
     /**
@@ -292,6 +294,17 @@ trait LfmHelpers
     }
 
     /**
+     * remove index-path like 'index.php' from url
+     *
+     * @param  string  $path  Any url.
+     * @return string
+     */
+    public function removeIndexPath($path)
+    {
+        return preg_replace('/\/index.php/', '', $path);
+    }
+
+    /**
      * Translate file name to make it compatible on Windows.
      *
      * @param  string  $input  Any string.
@@ -332,7 +345,8 @@ trait LfmHelpers
      */
     public function isProcessingImages()
     {
-        return lcfirst(str_singular(request('type', '') ?: '')) === 'image';
+        $type = lcfirst(str_singular(request('type', '') ?: ''));
+        return ($type === 'image') || ($type === 'Images');
     }
 
     /**
@@ -392,11 +406,12 @@ trait LfmHelpers
      */
     public function applyIniOverrides()
     {
-        if (count(config('lfm.php_ini_overrides')) == 0) {
+        $confval = config('lfm.php_ini_overrides');
+        if (!$confval || (count($confval) == 0)) {
             return;
         }
 
-        foreach (config('lfm.php_ini_overrides') as $key => $value) {
+        foreach ($confval as $key => $value) {
             if ($value && $value != 'false') {
                 ini_set($key, $value);
             }

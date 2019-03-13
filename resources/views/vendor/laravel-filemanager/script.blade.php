@@ -385,9 +385,9 @@ function notify(x) {
   bootbox.alert(x);
 }
 
-function fileView(x) {
+function fileView(x, full) {
   var rnd = makeRandom();
-  var img_src = image_url + $('#working_dir').val() + ds + x;
+  var img_src = full? x : (image_url + $('#working_dir').val() + ds + x);
   var img = "<img class='img img-responsive center-block' src='" + img_src + "'>";
   $('#fileview_body').html(img);
   $('#fileViewModal').modal();

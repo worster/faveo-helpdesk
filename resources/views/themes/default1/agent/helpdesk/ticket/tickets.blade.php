@@ -168,7 +168,7 @@ if (\Input::has('assigned'))
             </button>
             <ul class="dropdown-menu">
                 @foreach($statuses as $ticket_status)    
-                <li onclick="changeStatus({!! $ticket_status -> id !!}, '{!! $ticket_status->name !!}')"><a href="#"><i class="{!! $ticket_status->icon !!}" style="color:{!! $ticket_status->icon_color !!};"> </i>{!! $ticket_status->name !!}</a></li>
+                <li onclick="changeStatus({!! $ticket_status -> id !!}, '{!! $ticket_status->name !!}')"><a href="#"><i class="{!! $ticket_status->icon !!}" style="color:{!! $ticket_status->icon_color !!};"> </i>{!! Lang::get('lang.' . strtolower($ticket_status->name)) !!}</a></li>
                 @endforeach
             </ul>
         </div>

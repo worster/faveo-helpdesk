@@ -42,6 +42,7 @@ return [
     'error-file-name'   => '請輸入檔案名稱！',
     'error-file-empty'  => '請選擇檔案！',
     'error-file-exist'  => '相同檔名的檔案已存在！',
+    'error-file-alnum'  => '檔案名稱只能包含英數字！',
     'error-file-size'   => '檔案過大，無法上傳! (檔案大小上限: :max)',
     'error-delete-folder'=> '資料夾未清空，無法刪除！',
     'error-folder-name' => '請輸入資料夾名稱！',

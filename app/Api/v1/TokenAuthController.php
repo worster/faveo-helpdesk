@@ -183,7 +183,7 @@ class TokenAuthController extends Controller
 
                 return response()->json(compact('result'));
             }
-        } catch (Exception $ex) {
+        } catch (Exception $e) {
             $error = $e->getMessage();
 
             return response()->json(compact('error'));

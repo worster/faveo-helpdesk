@@ -38,9 +38,7 @@ class RenameController extends LfmController
         $old_file = parent::getCurrentPath($old_name);
         $new_file = parent::getCurrentPath($new_name);
 
-        event(new FolderIsRenaming($old_file, $new_file));
-
-        if (config('lfm.alphanumeric_directory') && preg_match('/[^\w-]/i', $new_name)) {
+        if (config('lfm.alphanumeric_directory') && preg_match('/[^\.-\w]/i', $new_name)) {
             return parent::error('folder-alnum');
         }
 
@@ -48,6 +46,7 @@ class RenameController extends LfmController
             return parent::error('rename');
         }
 
+        event(new FolderIsRenaming($old_file, $new_file));
         File::move($old_file, $new_file);
         event(new FolderWasRenamed($old_file, $new_file));
 
@@ -64,16 +63,17 @@ class RenameController extends LfmController
         $extension = File::extension($old_file);
         $new_file = parent::getCurrentPath(basename($new_name, ".$extension") . ".$extension");
 
-        if (config('lfm.alphanumeric_filename') && preg_match('/[^\w-.]/i', $new_name)) {
+        $confval = config('lfm.alphanumeric_filename');
+        if ($confval && preg_match('/[^\.-\w]/i', $new_name)) {
             return parent::error('file-alnum');
         }
-
-        // TODO Should be "FileIsRenaming"
-        event(new ImageIsRenaming($old_file, $new_file));
 
         if (File::exists($new_file)) {
             return parent::error('rename');
         }
+
+        // TODO Should be "FileIsRenaming"
+        event(new ImageIsRenaming($old_file, $new_file));
 
         if (parent::fileIsImage($old_file) && File::exists(parent::getThumbPath($old_name))) {
             File::move(parent::getThumbPath($old_name), parent::getThumbPath($new_name));

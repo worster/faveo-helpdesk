@@ -30,7 +30,7 @@
                     <td>
                         <i class="fa fa-image"></i>
                         <?php $file_name = $file['name'];?>
-                        <a href="javascript:useFile('{{ $file_name }}')">
+                        <a href="javascript:useFile('{{ $file->url }}')">
                             {{ $file_name }}
                         </a>
                         &nbsp;&nbsp;

@@ -1,21 +1,23 @@
-<?php $file_name = $file_info[$key]['name'];?>
+<?php $file_name = $file_info[$key]->name;?>
 @if($type == 'Images')
-<?php $thumb_src = $thumb_url . $file_name;?>
+<?php $thumb_src = $file_info[$key]->thumb;?>
+@else
+<?php $thumb_src = 'no thumb';?>
 @endif
 
 <div class="col-sm-4 col-md-3 col-lg-2 img-row">
 
   <div class="thumbnail thumbnail-img text-center" data-id="{{ $file_name }}" id="img_thumbnail_{{ $key }}">
     @if($type == 'Images')
-    <img id="{{ $file_name }}" src="{{ asset($thumb_src) }}" alt="" class="pointer" onclick="useFile('{{ $file_name }}')">
+    <img id="{{ $file_name }}" src="{{ asset($thumb_src) }}" alt="" class="pointer" onclick="useFile('{{ $file->url }}')">
     @else
-    <i class="fa {{ $file['icon'] }} fa-5x" style="height:200px;cursor:pointer;padding-top:60px;" onclick="useFile('{{ $file_name }}')"></i>
+    <i class="fa {{ $file->icon }} fa-5x" style="height:200px;cursor:pointer;padding-top:60px;" onclick="useFile('{{ $file->url }}')"></i>
     @endif
   </div>
 
   <div class="caption text-center">
     <div class="btn-group">
-      <button type="button" onclick="useFile('{{ $file_name }}')" class="btn btn-default btn-xs">
+      <button type="button" onclick="useFile('{{ $file->url }}')" class="btn btn-default btn-xs">
         {{ str_limit($file_name, $limit = 10, $end = '...') }}
       </button>
       <button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-expanded="false">
@@ -27,7 +29,7 @@
         <li><a href="javascript:download('{{ $file_name }}')"><i class="fa fa-download fa-fw"></i> {{ Lang::get('laravel-filemanager::lfm.menu-download') }}</a></li>
         <li class="divider"></li>
         @if($type == 'Images')
-        <li><a href="javascript:fileView('{{ $file_name }}')"><i class="fa fa-image fa-fw"></i> {{ Lang::get('laravel-filemanager::lfm.menu-view') }}</a></li>
+        <li><a href="javascript:fileView('{{ $file->url }}', true)"><i class="fa fa-image fa-fw"></i> {{ Lang::get('laravel-filemanager::lfm.menu-view') }}</a></li>
         {{--<li><a href="javascript:notImp()">Rotate</a></li>--}}
         <li><a href="javascript:resizeImage('{{ $file_name }}')"><i class="fa fa-arrows fa-fw"></i> {{ Lang::get('laravel-filemanager::lfm.menu-resize') }}</a></li>
         <li><a href="javascript:cropImage('{{ $file_name }}')"><i class="fa fa-crop fa-fw"></i> {{ Lang::get('laravel-filemanager::lfm.menu-crop') }}</a></li>
@@ -37,4 +39,5 @@
       </ul>
     </div>
   </div>
+
 </div>

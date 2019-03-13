@@ -97,6 +97,7 @@
                     </div>
                     <input type='hidden' name='working_dir' id='working_dir' value='{{$working_dir}}'>
                     <input type='hidden' name='show_list' id='show_list' value='0'>
+                    <input type='hidden' name='type' id='type' value='{{ request("type") }}'>
                     <input type='hidden' name='_token' value='{{csrf_token()}}'>
                 </form>
             </div>
@@ -143,12 +144,13 @@
     $(document).ready(function () {
         bootbox.setDefaults({locale:"{{ Lang::get('laravel-filemanager::lfm.locale-bootbox') }}"});
         // load folders
+        var type = getSessionType();
         $.ajax({
             type: 'GET',
             dataType: 'text',
             url: '{{url('/laravel-filemanager/folders')}}',
             
-            data: 'working_dir={{ $working_dir }}',
+            data: 'working_dir={{ $working_dir }}&type=' + type,
             cache: false
         }).done(function (data) {
             $('#tree1').html(data);
@@ -160,6 +162,7 @@
     $('#upload-btn').click(function () {
         var options = {
             beforeSubmit:  showRequest,
+            error:         showError,
             success:       showResponse
         };
 
@@ -176,6 +179,14 @@
             }
             $('#upload').val('');
             loadItems();
+        }
+
+        function showError(jqXHR, textStatus, errorThrown)  {
+            $('#upload-btn').html('{{ Lang::get("laravel-filemanager::lfm.btn-upload") }}');
+            if (errorThrown && (errorThrown != '')) {
+                notify(errorThrown);
+            }
+            $('#upload').val('');
         }
 
         $('#uploadForm').ajaxSubmit(options);
@@ -212,7 +223,12 @@
                 $('#' + x + ' > i').addClass('fa-folder');
             }
         }
-        $('#working_dir').val("{{ (Config::get('lfm.allow_multi_user')) ? Auth::user()->user_field.'/' : '' }}" + $('#' + x).data('id'));
+        var dir = "{{ (Config::get('lfm.allow_multi_user')) ? Auth::user()->user_field.'/' : '' }}" + $('#' + x).data('id');
+        var base = "{{ $working_dir }}";
+        if (dir != base) {
+            dir = base + '/' + dir;
+        }
+        $('#working_dir').val(dir);
         loadItems();
     }
 
@@ -235,19 +251,26 @@
     }
 
     function download(x) {
+        var type = getSessionType();
         location.href = '{{url('/laravel-filemanager/download?')}}'
             + 'working_dir='
             + $('#working_dir').val()
+            + '&type='
+            + type
             + '&file='
             + x;
     }
 
-    function loadItems() {
+    function getSessionType() {
         var type = 'Images';
-
         @if ((Session::has('lfm_type')) && (Session::get('lfm_type') == 'Files'))
             type = 'Files';
         @endif
+        return type;
+    }
+
+    function loadItems() {
+        var type = getSessionType();
 
         $.ajax({
             type: 'GET',
@@ -261,16 +284,31 @@
             },
             cache: false
         }).done(function (data) {
-            $('#content').html(data);
-            $('#nav-buttons').removeClass('hidden');
-            $('.dropdown-toggle').dropdown();
-            refreshFolders();
+            try {
+                if (data && (data != '')) {
+                    data = JSON.parse(data);
+                    if (data && data.html) {
+                        $('#content').html(data.html);
+                    } else {
+                        $('#content').html(data);
+                    }
+                } else {
+                    $('#content').html(data);
+                }
+                $('#nav-buttons').removeClass('hidden');
+                $('.dropdown-toggle').dropdown();
+                refreshFolders();
+            } catch (ex) {
+                alert("invalid response data");
+            }
+
         });
     }
 
     function trash(x) {
         bootbox.confirm("{{ Lang::get('laravel-filemanager::lfm.message-delete') }}", function (result) {
             if (result == true) {
+                var type = getSessionType();
                 $.ajax({
                     type: 'GET',
                     dataType: 'text',
@@ -278,7 +316,8 @@
                     
                     data: {
                         working_dir: $('#working_dir').val(),
-                        items: x
+                        items: x,
+                        type: type
                     },
                     cache: false
                 }).done(function (data) {
@@ -296,6 +335,8 @@
     }
 
     function loadFolders() {
+        var type = getSessionType();
+
         $.ajax({
             type: 'GET',
             dataType: 'html',
@@ -303,7 +344,8 @@
             
             data: {
                 working_dir: $('#working_dir').val(),
-                show_list: $('#show_list').val()
+                show_list: $('#show_list').val(),
+                type: type
             },
             cache: false
         }).done(function (data) {
@@ -346,6 +388,7 @@
         bootbox.prompt("{{ Lang::get('laravel-filemanager::lfm.message-name') }}", function (result) {
             if (result === null) {
             } else {
+                var type = getSessionType();
                 $.ajax({
                     type: 'GET',
                     dataType: 'text',
@@ -353,7 +396,8 @@
                     
                     data: {
                         name: result,
-                        working_dir: $('#working_dir').val()
+                        working_dir: $('#working_dir').val(),
+                        type: type
                     },
                     cache: false
                 }).done(function (data) {
@@ -370,17 +414,17 @@
     });
 
     function useFile(file) {
-        var path = $('#working_dir').val();
+        // var path = $('#working_dir').val();
 
-        var item_url = image_url;
+        // var item_url = image_url;
 
-        @if ((Session::has('lfm_type')) && (Session::get('lfm_type') != "Images"))
-            item_url = file_url;
-        @endif
+        // @if ((Session::has('lfm_type')) && (Session::get('lfm_type') != "Images"))
+        //     item_url = file_url;
+        // @endif
 
-        if (path != '/') {
-            item_url = item_url + path + '/';
-        }
+        // if (path != '/') {
+        //     item_url = item_url + path + '/';
+        // }
 
         function getUrlParam(paramName) {
             var reParam = new RegExp('(?:[\?&]|&)' + paramName + '=([^&]+)', 'i');
@@ -390,9 +434,10 @@
 
         var funcNum = getUrlParam('CKEditorFuncNum');
         
-        window.opener.CKEDITOR.tools.callFunction(funcNum, path + '/' + file);
+        // window.opener.CKEDITOR.tools.callFunction(funcNum, path + '/' + file);
 
-        window.opener.CKEDITOR.tools.callFunction(funcNum, item_url + file);
+        // window.opener.CKEDITOR.tools.callFunction(funcNum, item_url + file);
+        window.opener.CKEDITOR.tools.callFunction(funcNum, file);
 
         window.close();
     }
@@ -403,6 +448,7 @@
             value: x,
             callback: function (result) {
                 if (result !== null) {
+                    var type = getSessionType();
                     $.ajax({
                         type: 'GET',
                         dataType: 'text',
@@ -411,6 +457,7 @@
                         data: {
                             file: x,
                             working_dir: $('#working_dir').val(),
+                            type: type,
                             new_name: result
                         },
                         cache: false
@@ -458,9 +505,9 @@
         loadItems();
     });
 
-    function fileView(x) {
+    function fileView(x, full) {
         var rnd = makeRandom();
-        var img_src = image_url + $('#working_dir').val() + '/' + x;
+        var img_src = full? x : (image_url + $('#working_dir').val() + '/' + x);
         var img = "<img class='img img-responsive center-block' src='" + img_src + "'>";
         $('#fileview_body').html(img);
         $('#fileViewModal').modal();

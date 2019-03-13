@@ -326,14 +326,18 @@
                             <a href="#">
                                 <i class="fa fa-folder-open"></i> <span>{!! $name !!}</span> <i class="fa fa-angle-left pull-right"></i>
                             </a>
-                           @foreach($statuses as $status)
-                           @if($dept->get($status))
-                           <ul class="treeview-menu">
-                                <li @if($status2 == $dept->get($status)->status && $dept2 === $name) @yield('inbox') @endif><a href="{!! url('tickets?departments='.$name.'&status='.$dept->get($status)->status) !!}"><i class="fa fa-circle-o"></i> {!!$dept->get($status)->status !!}<small class="label pull-right bg-green">{{$dept->get($status)->count}}</small></a></li>
+                            @foreach($statuses as $status)
+                            @if($dept->get($status))
+                            <ul class="treeview-menu">
+                                <li @if($status2 == $dept->get($status)->status && $dept2 === $name) @yield('inbox') @endif>
+                                    <a href="{!! url('tickets?departments='.$name.'&status='.$dept->get($status)->status) !!}">
+                                    <i class="fa fa-circle-o"></i> {!!Lang::get("lang." . strtolower($dept->get($status)->status)) !!} 
+                                    <small class="label pull-right bg-green">{{$dept->get($status)->count}}</small>
+                                    </a>
+                                </li>
                             </ul>
-                           @endif
+                            @endif
                             @endforeach
-
                         </li>
                         @endforeach
                         @else

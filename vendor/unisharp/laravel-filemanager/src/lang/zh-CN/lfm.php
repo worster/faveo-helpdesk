@@ -42,6 +42,7 @@ return [
     'error-file-name'   => '文件名不能为空!',
     'error-file-empty'  => '请选择档案！',
     'error-file-exist'  => '相同档名的档案已存在！',
+    'error-file-alnum'  => '文件名称只能包含英数字!',
     'error-file-size'   => '档案过大，无法上传! (档案大小上限: :max)',
     'error-delete-folder'=> '文件夹未清空，无法删除！',
     'error-folder-name' => '请输入文件夹名称！',

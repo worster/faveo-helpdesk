@@ -30,7 +30,7 @@ class="active"
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="tab_1">
-                {!! Form::open(['route'=>'select_all','method'=>'post']) !!}
+                {!! Form::open(['route'=>'ticket.close.selected', 'method'=>'post']) !!}
                 <div class="mailbox-controls">
                     <!-- Check all button -->
                     <a class="btn btn-default btn-sm checkbox-toggle"><i class="fa fa-square-o"></i></a>
@@ -119,7 +119,7 @@ class="active"
             </div><!-- /.box-body -->
             {{-- /.tab_1 --}}
             <div class="tab-pane" id="tab_2">
-                {!! Form::open(['route'=>'select_all','method'=>'post']) !!}
+                {!! Form::open(['route'=>'ticket.open.selected', 'method'=>'post']) !!}
                 <div class="mailbox-controls">
                     <!-- Check all button -->
                     <a class="btn btn-default btn-sm checkbox-toggle"><i class="fa fa-square-o"></i></a>

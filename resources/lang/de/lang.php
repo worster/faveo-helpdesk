@@ -770,6 +770,7 @@ return [
     'access-ticket'                                   => 'Aufmerksam! Dieses Ticket wurde von Ihnen als nächstes gesperrt',
     'minutes'                                         => 'Protokoll',
     'in_minutes'                                      => 'In Minuten',
+    'change-owner'                                    => 'Wechsel Eigentümer',
     'add_another_owner'                               => 'Fügen Sie einen anderen Besitzer hinzu',
     'user-not-found'                                  => 'Benutzer nicht gefunden. Versuchen Sie es erneut oder fügen Sie einen neuen Benutzer hinzu.',
     'change-success'                                  => 'Erfolg! Inhaber wurde für dieses Ticket geändert.',

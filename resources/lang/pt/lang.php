@@ -618,6 +618,7 @@ return [
     'delete_from'                           => 'Deletar formulário',
     'are_you_sure_you_want_to_delete'       => 'Tem certeza que deseja excluir',
     'close'                                 => 'Fechar',
+    'resolve'                               => 'Resolver',
     'instructions'                          => 'Instruções',
     'instructions_on_creating_form'         => "Para selecionar o tipo do campo que deseja adicionar no fomulário clique em 'tipo'. Não esqueça de definir as opções do campo selecionado, checkbox ou radio..Separe cada opção por uma vírgula. Depois de concluir a criação do formulário, você pode salvar clicando no botão salvar formulário",
     'form_properties'                       => 'Propriedades do formulário',
@@ -915,6 +916,7 @@ return [
     'trash-delete-title-msg'                                                        => 'Clique aqui para deletar os tickets permanentemente.',
     'moved_to_trash'                                                                => 'Tickets selecionados foram movidos para a lixeira.',
     'tickets_have_been_closed'                                                      => 'Os tickets selecionados foram fechados.',
+    'tickets_have_been_resolved'                                                    => 'Os tickets selecionados foram resolvidos.',
     'tickets_have_been_opened'                                                      => 'Os tickets selecionados foram abertos.',
 
     /*
@@ -1071,6 +1073,7 @@ return [
     'access-ticket'                                   => 'Atenção! Este ticket foi bloqueado por você para os próximos',
     'minutes'                                         => 'Execução',
     'in_minutes'                                      => 'Em execução',
+    'change-owner'                                    => 'Alterar Proprietário',
     'add_another_owner'                               => 'Adicionar outro proprietário',
     'user-not-found'                                  => 'Usuário não encontrado. Tente de novo ou adicione um novo usuário.',
     'change-success'                                  => 'Proprietário do ticket alterado com sucesso!',

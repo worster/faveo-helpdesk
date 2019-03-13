@@ -37,7 +37,8 @@ class WelcomepageController extends Controller
             $content = $note->content;
         }
 
-        return view('themes.default1.client.guest-user.guest', compact('heading', 'content'));
+        return view('themes.default1.client.guest-user.guest', compact('content'));
+        // return view('themes.default1.client.guest-user.guest', compact('heading', 'content'));
     }
 
     public function index()

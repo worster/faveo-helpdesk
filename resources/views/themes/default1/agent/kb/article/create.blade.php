@@ -88,13 +88,13 @@ class="active"
                         {!! Form::textarea('description',null,['class' => 'form-control','id'=>'editor','size' => '128x20','placeholder'=>Lang::get('lang.enter_the_description')]) !!}
                     </div>
                     <script>
-  CKEDITOR.replace( 'description', {
-    filebrowserImageBrowseUrl: "{{url('laravel-filemanager?type=Images')}}",
-    filebrowserImageUploadUrl: "{{url('laravel-filemanager/upload?type=Images')}}",
-    filebrowserBrowseUrl: "{{url('laravel-filemanager?type=Files')}}",
-    filebrowserUploadUrl: "{{url('laravel-filemanager/upload?type=Files')}}"
-  });
-</script>
+                        CKEDITOR.replace( 'description', {
+                            filebrowserImageBrowseUrl: "{{url('laravel-filemanager?type=Images')}}",
+                            filebrowserImageUploadUrl: "{{url('laravel-filemanager/upload?type=Images')}}",
+                            filebrowserBrowseUrl: "{{url('laravel-filemanager?type=Files')}}",
+                            filebrowserUploadUrl: "{{url('laravel-filemanager/upload?type=Files')}}"
+                        });
+                    </script>
                 </div>
             </div>
         </div>
@@ -248,4 +248,4 @@ class="active"
 </script>
 
 
-                @stop
+@stop

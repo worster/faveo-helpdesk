@@ -158,7 +158,7 @@ class UnAuthController extends Controller
                 return redirect()->route('form')->with('fails', Lang::get('lang.sorry_you_are_not_allowed_token_expired'));
             }
         } catch (Exception $ex) {
-            return redirect()->route('form')->with('fails', $e->getMessage());
+            return redirect()->route('form')->with('fails', $ex->getMessage());
         }
     }
 

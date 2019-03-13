@@ -128,32 +128,32 @@ if ($thread->title != "") {
             <?php Event::fire('show-add-event-btn', array()); ?>
 
             <a href="{{url('ticket/print/'.$tickets->id)}}" target="_blank" class="btn btn-primary btn-sm"><i class="fa fa-print" > </i> {!! Lang::get('lang.generate_pdf') !!}</a>
-            <div class="btn-group">
+            <div id="change-status" class="btn-group">
                 <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" id="d1"><i class="fa fa-exchange" style="color:teal;" id="hidespin"> </i><i class="fa fa-spinner fa-spin" style="color:teal; display:none;" id="spin"></i>
                     {!! Lang::get('lang.change_status') !!} <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
+                    @if ($tickets->status != 1)
                     <li id="open"><a href="#"><i class="fa fa-folder-open-o" style="color:red;"> </i>{!! Lang::get('lang.open') !!}</a></li>
-                   
+                    @endif
+                
                     <?php if ( $tickets_approval->status==7) {?>
-                  @if(Auth::user()->role == 'admin')
+                    @if (Auth::user()->role == 'admin')
                      <li id="approval_close"><a href="#"><i class="glyphicon glyphicon-thumbs-up" style="color:red;"> </i>{!! Lang::get('lang.approval') !!}</a></li>
-                     @endif
+                    @endif
+                    <?php } ?>
+
+                    @if ($tickets->status != 3)
+                    <?php if ( ($tickets_approval->status==3) || ($tickets_approval->status==1) ) {?>
+                    <?php if ($group->can_edit_ticket == 1) {?>
+                    <li id="close"><a href="#"><i class="fa fa-ban" style="color:red;"> </i>{!! Lang::get('lang.close') !!}</a></li>
+                    <?php } ?>
+                    <?php } ?>
+                    @endif
                     
-                    <?php } ?>
-
-                     <?php if ( $tickets_approval->status==3) {?>
-                    <?php if ($group->can_edit_ticket == 1) {?>
-                    <li id="close"><a href="#"><i class="fa fa-check" style="color:green;"> </i>{!! Lang::get('lang.close') !!}</a></li>
-                    <?php } ?>
-                     <?php } ?>
-
-                     <?php if ( $tickets_approval->status==1) {?>
-                    <?php if ($group->can_edit_ticket == 1) {?>
-                    <li id="close"><a href="#"><i class="fa fa-check" style="color:green;"> </i>{!! Lang::get('lang.close') !!}</a></li>
-                    <?php } ?>
-                     <?php } ?>
+                    @if ($tickets->status != 2)
                     <li id="resolved"><a href="#"><i class="fa fa-check-circle-o " style="color:green;"> </i>{!! Lang::get('lang.resolved') !!} </a></li>
+                    @endif
                 </ul>
             </div>
             <?php if ($group->can_delete_ticket == 1 || $group->can_ban_email == 1) { ?>
@@ -162,27 +162,28 @@ if ($thread->title != "") {
                         {!! Lang::get('lang.more') !!} <span class="caret"></span>
                     </button>
                     <ul  class="dropdown-menu pull-right">
-                        <li data-toggle="modal" data-target="#ChangeOwner"><a href="#"><i class="fa fa-users" style="color:green;"> </i>Change Owner</a></li>
-                        @if($tickets->status != 3 && $tickets->status != 2)
+                        <li data-toggle="modal" data-target="#ChangeOwner"><a href="#"><i class="fa fa-users" style="color:green;"> </i>{!! Lang::get('lang.change-owner') !!}</a></li>
+                        @if ($tickets->status != 3 && $tickets->status != 2)
                         <li data-toggle="modal" data-target="#MergeTickets"><a href="#"><i class="fa fa-code-fork" style="color:teal;"> </i>{!! Lang::get('lang.merge-ticket') !!}</a></li>
                         @endif
+                        @if ($tickets->status != 5)
                         <?php if ($group->can_delete_ticket == 1) { ?>
                             <li id="delete"><a href="#"><i class="fa fa-trash-o" style="color:red;"> </i>{!! Lang::get('lang.delete_ticket') !!}</a></li>
-                        <?php }
-                        ?>
+                        <?php } ?>
+                        @endif
                         <?php if ($group->can_ban_email == 1) { ?>
                             <li data-toggle="modal" data-target="#banemail"><a href="#"><i class="fa fa-ban" style="color:red;"></i>{!! Lang::get('lang.ban_email') !!}</a></li>
                         <?php 
-                        \Event::fire('ticket.details.more.list',[$tickets]);
-                        }
-                        ?>          </ul>
+                            \Event::fire('ticket.details.more.list',[$tickets]);
+                        } ?>
+                    </ul>
                 </div>
             <?php }
             ?>
         </div>
     </div>
     <!-- ticket details Table -->
-    <div class="box-body">
+    <div class="box-body ticket-details">
         <div id="alert11" class="alert alert-success alert-dismissable" style="display:none;">
             <button id="dismiss11" type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
             <h4><i class="icon fa fa-check"></i>{!! Lang::get('lang.alert') !!}!</h4>
@@ -249,7 +250,7 @@ if ($thread->title != "") {
                                 <tr><td><b>{!! Lang::get('lang.status') !!}:</b></td>       
                                     <?php $status = App\Model\helpdesk\Ticket\Ticket_Status::where('id', '=', $tickets->status)->first(); ?>
                                     @if($status)
-                                    <td title="{{$status->properties}}">{{$status->name}}</td>
+                                    <td title="{{$status->properties}}">{{ Lang::get('lang.' . strtolower($status->name)) }}</td>
                                     @endif
                                 </tr>
                                 <tr><td><b>{!! Lang::get('lang.priority') !!}:</b></td>     
@@ -1338,340 +1339,343 @@ if ($thread->title != "") {
 
 <!-- scripts used on page -->
 <script type="text/javascript">
-            function clearAll() {
-                $("#file_details").html("");
-                $("#total-size").html("");
-                $("#attachment").val('');
-                $("#clear-file").hide();
-                $("#replybtn").removeClass('disabled');
-            }
+
+    function clearAll() {
+        $("#file_details").html("");
+        $("#total-size").html("");
+        $("#attachment").val('');
+        $("#clear-file").hide();
+        $("#replybtn").removeClass('disabled');
+    }
+
+    function showSuccessMessage(message) {
+        $(".ticket-details .alert-success").show();
+        $('.ticket-details .alert-success #message-success1').html(message);
+    }
+
+    function hideSuccessMessage(delay) {
+        setTimeout( function() { $(".ticket-details .alert-success").hide(); }, delay ); 
+    }
+
+    function setLoadingVisible(visible) {
+        if (visible) {
+            $("#hide2").hide();
+            $("#show2").show();
+        } else {
+            $("#hide2").show();
+            $("#show2").hide();
+        }
+    }
+
+    function toggleChangeStatusButton() {
+        $("#d1").trigger("click");
+    }
             
-            $(function () {
-            $("#InternalContent").wysihtml5();
-            });
-            jQuery('.star').attr('disabled', true);
+    $(function () {
+        $("#InternalContent").wysihtml5();
+    });
+
+    jQuery('.star').attr('disabled', true);
             
-            $(function() {
-                $("#tags, #tags2").autocomplete({
-                    source: 'auto/<?php echo $tickets->id; ?>'
-                });
-            });
-            jQuery(document).ready(function() {
-    $("#cc_page").on('click', '.search_r', function(){
-    var search_r = $('a', this).attr('id');
+    $(function() {
+        $("#tags, #tags2").autocomplete({
+            source: 'auto/<?php echo $tickets->id; ?>'
+        });
+    });
+    
+    jQuery(document).ready(function() {
+        $("#cc_page").on('click', '.search_r', function(){
+            var search_r = $('a', this).attr('id');
             $.ajax({
-            type: "GET",
-                    url: "../ticket/status/{{$tickets->id}}/" + search_r,
-                    beforeSend: function () {
+                type: "GET",
+                url: "../ticket/status/{{$tickets->id}}/" + search_r,
+                beforeSend: function () {
                     $("#refresh").hide();
-                            $("#loader").show();
-                    },
-                    success: function (response) {
-
+                    $("#loader").show();
+                },
+                success: function (response) {
                     $("#refresh").load("../thread/{{$tickets->id}}  #refresh");
-                            $("#refresh").show();
-                            $("#loader").hide();
-                            var message = response;
-                            $("#alert11").show();
-                            $('#message-success1').html(message);
-                            setInterval(function(){$("#alert11").hide(); }, 4000);
-                    }
-            });
-            return false;
-    });
-    });
-            $(document).ready(function () {
-
-    //Initialize Select2 Elements
-    $(".select2").select2();
-            setInterval(function(){
-            $("#auto-submit").submit(function(){
-            $.ajax({
-            type: "POST",
-                    url: "{!! URL::route('lock',$tickets->id) !!}",
-            })
-                    return false;
-            });
-            }, 180000);
-    });
-            jQuery(document).ready(function() {
-    // Close a ticket
-    $('#close').on('click', function(e) {
-    $.ajax({
-    type: "POST",
-            url: "../ticket/close/{{$tickets->id}}",
-            beforeSend: function() {
-            $("#hidespin").hide();
-                    $("#spin").show();
-                    $("#hide2").hide();
-                    $("#show2").show();
-            },
-            success: function(response) {
-            $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
-                    $("#show2").hide();
-                    $("#spin").hide();
-                    $("#hide2").show();
-                    $("#hidespin").show();
-                    $("#d1").trigger("click");
-                    var message = "{!! Lang::get('lang.your_ticket_have_been_closed') !!}";
+                    $("#refresh").show();
+                    $("#loader").hide();
+                    var message = response;
                     $("#alert11").show();
                     $('#message-success1').html(message);
-                    setTimeout(function() {
-                        window.location = document.referrer;
-                    }, 500);
-            }
-    })
+                    setInterval(function(){$("#alert11").hide(); }, 4000);
+                }
+            });
             return false;
+        });
+    });
+    
+    $(document).ready(function () {
+        //Initialize Select2 Elements
+        $(".select2").select2();
+        setInterval(function(){
+            $("#auto-submit").submit(function(){
+                $.ajax({
+                    type: "POST",
+                    url: "{!! URL::route('lock',$tickets->id) !!}",
+                })
+                return false;
+            });
+        }, 180000);
+    });
+
+    jQuery(document).ready(function() {
+
+    // Close a ticket
+    $('#close').on('click', function(e) {
+        $.ajax({
+            type: "POST",
+            url: "../ticket/close/{{$tickets->id}}",
+            beforeSend: function() {
+                setLoadingVisible(true);
+                toggleChangeStatusButton();
+            },
+            success: function(response) {
+                setLoadingVisible(false);
+                var message = "{!! Lang::get('lang.your_ticket_have_been_closed') . '<br />' . Lang::get('lang.reload-be-patient-message') !!}";;
+                showSuccessMessage(message);
+                setTimeout(function() {
+                    hideSuccessMessage(2000);
+                    // window.location = document.referrer;
+                    window.location.reload();
+                }, 500);
+            }
+        })
+        return false;
     });
     
     // approval close ticket
- $('#approval_close').on('click', function(e) {
-     
-    $.ajax({
-    type: "POST",
+    $('#approval_close').on('click', function(e) {
+        $.ajax({
+            type: "POST",
             url: "../ticket/close/get-approval/{{$tickets->id}}",//route 600
             beforeSend: function() {
-            $("#hidespin").hide();
-                    $("#spin").show();
-                    $("#hide2").hide();
-                    $("#show2").show();
+                // $("#hidespin").hide();
+                // $("#spin").show();
+                setLoadingVisible(true);
+                toggleChangeStatusButton();
             },
-
             success: function(response) {
-           
-            $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
-             
-                    $("#show2").hide();
-                    $("#spin").hide();
-                    $("#hide2").show();
-                    $("#hidespin").show();
-                    $("#d1").trigger("click");
-                    var message = "successfull approval";
-                    $("#alert11").show();
-                    $('#message-success1').html(message);
-                    setInterval(function(){
-                    $("#alert11").hide();
-                            setTimeout(function() {
-                            window.location = document.referrer;
-                            }, 500);
-                    }, 2000);
+                // $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
+                // $("#spin").hide();
+                // $("#hidespin").show();
+                setLoadingVisible(false);
+                var message = "successfull approval";
+                showSuccessMessage(message);
+                setTimeout(function(){
+                    hideSuccessMessage(2000);
+                    // window.location = document.referrer;
+                    window.location.reload();
+                }, 2000);
             }
-    })
-            return false;
+        })
+        return false;
     });
 
-            // Resolved  a ticket
-            $('#resolved').on('click', function(e) {
-    $.ajax({
-    type: "POST",
+    // Resolved a ticket
+    $('#resolved').on('click', function(e) {
+        $.ajax({
+            type: "POST",
             url: "../ticket/resolve/{{$tickets->id}}",
             beforeSend: function() {
-            $("#hide2").hide();
-                    $("#show2").show();
+                setLoadingVisible(true);
+                toggleChangeStatusButton();
             },
             success: function(response) {
-            $("#refresh").load("../thread/{{$tickets->id}}  #refresh");
-                    $("#d1").trigger("click");
-                    $("#hide2").show();
-                    $("#show2").hide();
-                    var message = "{!! Lang::get('lang.your_ticket_have_been_resolved') !!}";
-                    $("#alert11").show();
-                    $('#message-success1').html(message);
-                    setInterval(function(){$("#alert11").hide();
-                            setTimeout(function() {
-                            // var link = document.querySelector('#load-inbox');
-                            // if(link) {
-                            //     link.click();
-                            // }
-                            window.location = document.referrer;
-                            }, 500);
-                    }, 2000);
+                setLoadingVisible(false);
+                var message = "{!! Lang::get('lang.your_ticket_have_been_resolved') . '<br />' . Lang::get('lang.status-changed-successfully') . Lang::get('lang.reload-be-patient-message') !!}";
+                showSuccessMessage(message);
+                setTimeout( function() {
+                    hideSuccessMessage(2000);
+                    // window.location = document.referrer;
+                    window.location.reload();
+                }, 500);
             }
-    })
-            return false;
+        })
+        return false;
     });
-            // Open a ticket
-            $('#open').on('click', function(e) {
-    $.ajax({
-    type: "POST",
+
+    // Open a ticket
+    $('#open').on('click', function(e) {
+        $.ajax({
+            type: "POST",
             url: "../ticket/open/{{$tickets->id}}",
             beforeSend: function() {
-            $("#hide2").hide();
-                    $("#show2").show();
+                setLoadingVisible(true);
+                toggleChangeStatusButton();
             },
             success: function(response) {
-            $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
-                    $("#d1").trigger("click");
-                    $("#hide2").show();
-                    $("#show2").hide();
-                    var message = "{!! Lang::get('lang.your_ticket_have_been_opened') !!}";
-                    $("#alert11").show();
-                    $('#message-success1').html(message);
-                    setInterval(function(){$("#alert11").hide(); }, 4000);
+                setLoadingVisible(false);
+                var message = "{!! Lang::get('lang.your_ticket_have_been_opened') . '<br />' . Lang::get('lang.status-changed-successfully') . Lang::get('lang.reload-be-patient-message') !!}";
+                showSuccessMessage(message);
+                setTimeout( function() {
+                    hideSuccessMessage(2000);
+                    // window.location = document.referrer;
+                    window.location.reload();
+                }, 500);
             }
-    })
-            return false;
+        })
+        return false;
     });
-            // delete a ticket
-            $('#delete').on('click', function(e) {
-    $.ajax({
-    type: "POST",
+
+    // delete a ticket
+    $('#delete').on('click', function(e) {
+        $.ajax({
+            type: "POST",
             url: "../ticket/delete/{{$tickets->id}}",
             beforeSend: function() {
-            $("#hide2").hide();
-                    $("#show2").show();
+                setLoadingVisible(true);
+                toggleChangeStatusButton();
             },
             success: function(response) {
-            $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
-                    $("#d2").trigger("click");
-                    $("#hide2").show();
-                    $("#show2").hide();
-                    var message = "{!! Lang::get('lang.your_ticket_have_been_moved_to_trash') !!}";
-                    $("#alert11").show();
-                    $('#message-success1').html(message);
-                    //alert(document.referrer);
-                    setInterval(function(){$("#alert11").hide();
-                            setTimeout(function() {
-                            // var link = document.querySelector('#load-inbox');
-                            // if(link) {
-                            //     link.click();
-                            // }
-                            window.location = document.referrer;
-                            }, 500);
-                    }, 2000);
+                // $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
+                setLoadingVisible(false);
+                var message = "{!! Lang::get('lang.your_ticket_have_been_moved_to_trash') . '<br />' . Lang::get('lang.reload-be-patient-message') !!}";
+                showSuccessMessage(message);
+                setTimeout( function() {
+                    hideSuccessMessage(2000);
+                    window.location = document.referrer;
+                }, 2000);
             }
-    })
-            return false;
+        })
+        return false;
     });
-            // ban email
-            $('#ban').on('click', function(e) {
-    $.ajax({
-    type: "GET",
+
+    // ban email
+    $('#ban').on('click', function(e) {
+        $.ajax({
+            type: "GET",
             url: "../email/ban/{{$tickets->id}}",
+            beforeSend: function() {
+                setLoadingVisible(true);
+                $("#dismis2").trigger("click");
+            },
             success: function(response) {
-            $("#dismis2").trigger("click");
-                    $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
-                    var message = "{!! Lang::get('lang.this_email_have_been_banned') !!}";
-                    $("#alert11").show();
-                    $('#message-success1').html(message);
-                    setInterval(function(){$("#alert11").hide(); }, 4000);
+                // $("#refresh").load("../thread/{{$tickets->id}}   #refresh");
+                setLoadingVisible(false);
+                var message = "{!! Lang::get('lang.this_email_have_been_banned') . '<br />' . Lang::get('lang.reload-be-patient-message') !!}";
+                showSuccessMessage(message);
+                setTimeout( function() {
+                    hideSuccessMessage(2000);
+                    // window.location = document.referrer;
+                    window.location.reload();
+                }, 2000);
             }
-    })
-            return false;
+        })
+        return false;
     });
-            // internal note
-            // $('#internal').click(function() {
-            //     $('#t1').hide();
-            //     $('#t2').show();
-            // });
 
-            // comment a ticket
-            // $('#aa').click(function() {
-            //     $('#t1').show();
-            //     $('#t2').hide();
-            // });
+    // internal note
+    // $('#internal').click(function() {
+    //     $('#t1').hide();
+    //     $('#t2').show();
+    // });
 
-// Edit a ticket
-            $('#form').on('submit', function() {
-    $.ajax({
-    type: "POST",
+    // comment a ticket
+    // $('#aa').click(function() {
+    //     $('#t1').show();
+    //     $('#t2').hide();
+    // });
+
+    // Edit a ticket
+    $('#form').on('submit', function() {
+        $.ajax({
+            type: "POST",
             url: "../ticket/post/edit/{{$tickets->id}}",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $("#hide").hide();
-                    $("#show").show();
+                $("#hide").hide();
+                $("#show").show();
             },
             success: function(response) {
-            $("#show").hide();
-                    $("#hide").show();
-                    if (response == 0) {
-            // message = "{!! Lang::get('lang.ticket_updated_successfully') !!}"
-            //         $("#dismis").trigger("click");
-            //         $("#refresh1").load("../thread/{{$tickets->id}}   #refresh1");
-            //         $("#refresh2").load("../thread/{{$tickets->id}}   #refresh2");
-            //         $("#alert11").show();
-            //         $('#message-success1').html(message);
-            //         setInterval(function(){$("#alert11").hide(); }, 4000);
-                location.reload();
+                $("#show").hide();
+                $("#hide").show();
+                if (response == 0) {
+                // message = "{!! Lang::get('lang.ticket_updated_successfully') !!}"
+                //         $("#dismis").trigger("click");
+                //         $("#refresh1").load("../thread/{{$tickets->id}}   #refresh1");
+                //         $("#refresh2").load("../thread/{{$tickets->id}}   #refresh2");
+                //         $("#alert11").show();
+                //         $('#message-success1').html(message);
+                //         setInterval(function(){$("#alert11").hide(); }, 4000);
+                    location.reload();
+                } else if (response == 1) {
+                    $("#error-subject").show();
+                } else if (response == 2) {
+                    $("#error-sla").show();
+                } else if (response == 3) {
+                    $("#error-help").show();
+                } else if (response == 4) {
+                    $("#error-source").show();
+                } else if (response == 5) {
+                    $("#error-priority").show();
+                }
             }
-            else if (response == 1) {
-            $("#error-subject").show();
-            }
-            else if (response == 2) {
-            $("#error-sla").show();
-            }
-            else if (response == 3) {
-            $("#error-help").show();
-            }
-            else if (response == 4) {
-            $("#error-source").show();
-            }
-            else if (response == 5) {
-            $("#error-priority").show();
-            }
-            }
-    })
-            return false;
+        })
+        return false;
     });
-// Assign a ticket
-            $('#form1').on('submit', function() {
-    $.ajax({
-    type: "POST",
+
+    // Assign a ticket
+    $('#form1').on('submit', function() {
+        $.ajax({
+            type: "POST",
             url: "../ticket/assign/{{ $tickets->id }}",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $("#assign_body").hide();
-                    $("#assign_loader").show();
+                $("#assign_body").hide();
+                $("#assign_loader").show();
             },
             success: function(response) {
-            if (response == 1)
-            {
-            // $("#assign_body").show();
-            // var message = "Success";
-            // $('#message-success1').html(message);
-            // setInterval(function(){$("#alert11").hide(); },4000);   
-            location.reload();
-            var message = "Success!";
+                if (response == 1) {
+                    // $("#assign_body").show();
+                    // var message = "Success";
+                    // $('#message-success1').html(message);
+                    // setInterval(function(){$("#alert11").hide(); },4000);   
+                    location.reload();
+                    var message = "Success!";
                     $("#alert11").show();
                     $('#message-success1').html(message);
                     setInterval(function(){$("#dismiss11").trigger("click"); }, 2000);
+                }
+                $("#assign_body").show();
+                $("#assign_loader").hide();
+                $("#dismis4").trigger("click");
+                // $("#RefreshAssign").load( "../thread/{{$tickets->id}} #RefreshAssign");
+                // $("#General").load( "../thread/{{$tickets->id}} #General");
             }
-            $("#assign_body").show();
-                    $("#assign_loader").hide();
-                    $("#dismis4").trigger("click");
-                    // $("#RefreshAssign").load( "../thread/{{$tickets->id}} #RefreshAssign");
-                    // $("#General").load( "../thread/{{$tickets->id}} #General");
-            }
-    })
-            return false;
+        })
+        return false;
     });
-            // Change owner of a ticket
-            $('#form4').on('submit', function() {
-    $.ajax({
-    type: "POST",
+
+    // Change owner of a ticket
+    $('#form4').on('submit', function() {
+        $.ajax({
+            type: "POST",
             url: "../change-owner/{{ $tickets->id }}",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $("#change_body").hide();
-                    $("#change_loader").show();
+                $("#change_body").hide();
+                $("#change_loader").show();
             },
             success: function(response) {
-            if (response != 1) {
-                // $("#assign_body").show();
-                var message = "{{Lang::get('lang.user-not-found')}}";
-                if (response == 400) {
-                    message = "{{Lang::get('lang.selected-user-is-already-the-owner')}}";
-                }
-                $('#change_alert').show();
-                $('#message-success42').html(message);
-                setInterval(function(){$("#change_alert").hide(); }, 5000);
-                $("#change_body").show();
-                $("#change_loader").hide();
-            } else {
-            $("#change_body").show();
+                if (response != 1) {
+                    // $("#assign_body").show();
+                    var message = "{{Lang::get('lang.user-not-found')}}";
+                    if (response == 400) {
+                        message = "{{Lang::get('lang.selected-user-is-already-the-owner')}}";
+                    }
+                    $('#change_alert').show();
+                    $('#message-success42').html(message);
+                    setInterval(function(){$("#change_alert").hide(); }, 5000);
+                    $("#change_body").show();
+                    $("#change_loader").hide();
+                } else {
+                    $("#change_body").show();
                     $("#change_loader").hide();
                     $("#dismis42").trigger("click");
                     // $("#RefreshAssign").load( "../thread/{{$tickets->id}} #RefreshAssign");
@@ -1686,25 +1690,26 @@ if ($thread->title != "") {
                     $("#alert11").show();
                     $('#message-success1').html(message);
                     setInterval(function(){$("#alert11").hide(); }, 4000);
+                }
             }
-            }
-    })
-            return false;
+        })
+        return false;
     });
-// Add and change owner of a ticket
-            $('#change-add-owner').on('submit', function(){
-    $.ajax({
-    type: "POST",
+
+    // Add and change owner of a ticket
+    $('#change-add-owner').on('submit', function(){
+        $.ajax({
+            type: "POST",
             url: "../change-owner/{{ $tickets->id }}", //url: "../add-user",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $('#add-change-loader').show();
-                    $('#add-change-body').hide();
+                $('#add-change-loader').show();
+                $('#add-change-body').hide();
             },
             success: function(response) {
-            if (response == 1){
-            $('#add-change-loader').hide();
+                if (response == 1){
+                    $('#add-change-loader').hide();
                     $('#add-change-body').show();
                     $("#close101").trigger("click");
                     $("#hide2").load("../thread/{{$tickets->id}}  #hide2");
@@ -1716,54 +1721,54 @@ if ($thread->title != "") {
                     $("#alert11").show();
                     $('#message-success1').html(message);
                     setInterval(function(){$("#alert11").hide(); }, 4000);
-            } else {
-            if (response == 4){
-            var message = "{{Lang::get('lang.user-exists')}}";
-            } else if (response == 5){
-            var message = "{{Lang::get('lang.valid-email')}}";
-            } else {
-            //var message = "Can't process your request. Try after some time.";
-            }
-            $('#change_alert2').show();
+                } else {
+                    if (response == 4){
+                        var message = "{{Lang::get('lang.user-exists')}}";
+                    } else if (response == 5){
+                        var message = "{{Lang::get('lang.valid-email')}}";
+                    } else {
+                        //var message = "Can't process your request. Try after some time.";
+                    }
+                    $('#change_alert2').show();
                     $('#message-success422').html(message);
                     setInterval(function(){$("#change_alert2").hide(); }, 8000);
                     $('#add-change-loader').hide();
                     $('#add-change-body').show();
-            }
-            }
-    })
-            return false;
-    });
-            // Internal Note
-            $('#form2').on('submit', function() {
-                var internal_content = document.getElementById('InternalContent').value;
-                if(internal_content) {
-                    $("#internal_content_class").removeClass('has-error');
-                    $("#alert23").hide();
-                } else {
-                    var message = "<li>{!! Lang::get('lang.internal_content_is_a_required_field') !!}</li>";
-                    $("#internal_content_class").addClass('has-error');
-                    $("#alert23").show();
-                    $('#message-danger2').html(message);
-                    $("#show3").hide();
-                    $("#t1").show();
-                    return false;
                 }
-    $.ajax({
-    type: "POST",
+            }
+        })
+        return false;
+    });
+
+    // Internal Note
+    $('#form2').on('submit', function() {
+        var internal_content = document.getElementById('InternalContent').value;
+        if(internal_content) {
+            $("#internal_content_class").removeClass('has-error');
+            $("#alert23").hide();
+        } else {
+            var message = "<li>{!! Lang::get('lang.internal_content_is_a_required_field') !!}</li>";
+            $("#internal_content_class").addClass('has-error');
+            $("#alert23").show();
+            $('#message-danger2').html(message);
+            $("#show3").hide();
+            $("#t1").show();
+            return false;
+        }
+        $.ajax({
+            type: "POST",
             url: "../internal/note/{{ $tickets->id }}",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $("#t2").hide();
-                    $("#show5").show();
+                $("#t2").hide();
+                $("#show5").show();
             },
             success: function(response) {
-
-            if (response == 1)
-            {
-            $("#refresh1").load("../thread/{{$tickets->id}}   #refresh1");
-            $(".embed-responsive-item").load("../thread/{{$tickets->id}}   .embed-responsive-item");
+                if (response == 1)
+                {
+                    $("#refresh1").load("../thread/{{$tickets->id}}   #refresh1");
+                    $(".embed-responsive-item").load("../thread/{{$tickets->id}}   .embed-responsive-item");
             
                     // $("#t4").load("../thread/{{$tickets->id}}   #t4");
                     var message = "{!! Lang::get('lang.internal-note-has-been-added') !!}";
@@ -1778,154 +1783,153 @@ if ($thread->title != "") {
                     div1.innerHTML = div1.innerHTML + '<textarea style="width:98%;height:200px;" name="InternalContent" class="form-control" id="InternalContent"/></textarea>';
                     var wysihtml5Editor = $('textarea').wysihtml5().data("wysihtml5").editor;
                     setInterval(function(){
-                            var head= document.getElementsByTagName('head')[0];
-                            var script= document.createElement('script');
-                            script.type= 'text/javascript';
-                            script.src= '{{asset("lb-faveo/js/jquery.rating.pack.js")}}';
-                            head.appendChild(script);
-//                            $('.rating-cancel').hide();
-//                            $(".star-rating-control").attr("disabled", "disabled").off('hover');
-//                            $(".star-rating-control").addClass("disabled")
-                        }, 4000);
-            } else {
-            // alert('fail');
-            var message = "{!! Lang::get('lang.for_some_reason_your_message_was_not_posted_please_try_again_later') !!}";
+                        var head= document.getElementsByTagName('head')[0];
+                        var script= document.createElement('script');
+                        script.type= 'text/javascript';
+                        script.src= '{{asset("lb-faveo/js/jquery.rating.pack.js")}}';
+                        head.appendChild(script);
+                        // $('.rating-cancel').hide();
+                        // $(".star-rating-control").attr("disabled", "disabled").off('hover');
+                        // $(".star-rating-control").addClass("disabled")
+                    }, 4000);
+                } else {
+                    // alert('fail');
+                    var message = "{!! Lang::get('lang.for_some_reason_your_message_was_not_posted_please_try_again_later') !!}";
                     $("#alert23").show();
                     $('#message-danger2').html(message);
                     setInterval(function(){$("#alert23").hide(); }, 4000);
                     // $( "#dismis4" ).trigger( "click" );
-            }
-            $("#t2").show();
-                    $("#show5").hide();
-            }
-    })
-            return false;
-    });
-// Ticket Reply
-            $('#attachment').change(function() {
-                input = document.getElementById('attachment');
-                if (!input) {
-                    alert("Um, couldn't find the fileinput element.");
-                } else if (!input.files) {
-                    alert("This browser doesn't seem to support the `files` property of file inputs.");
-                } else if (!input.files[0]) {
-                } else {
-                    $("#file_details").html("");
-                    var total_size = 0;
-                    for(i = 0; i < input.files.length; i++) {
-                        file = input.files[i];
-                        var supported_size = "{!! $max_size_in_bytes !!}";
-                        var supported_actual_size = "{!! $max_size_in_actual !!}";
-                        if(file.size < supported_size) {
-                            $("#file_details").append("<tr> <td> " + file.name + " </td><td> " + formatBytes(file.size) + "</td> </tr>");
-                        } else {
-                            $("#file_details").append("<tr style='color:red;'> <td> " + file.name + " </td><td> " + formatBytes(file.size) + "</td> </tr>");
-                        }
-                        total_size += parseInt(file.size);
-                    }
-                    if(total_size > supported_size) {
-                        $("#total-size").append("<span style='color:red'>Your total file upload size is greater than "+ supported_actual_size +"</span>");
-                        $("#replybtn").addClass('disabled');
-                        $("#clear-file").show();
-                    } else {
-                        $("#total-size").html("");
-                        $("#replybtn").removeClass('disabled');
-                        $("#clear-file").show();
-                    }
                 }
-            });
-            
-            function formatBytes(bytes,decimals) {
-                if(bytes == 0) return '0 Byte';
-                var k = 1000;
-                var dm = decimals + 1 || 3;
-                var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-                var i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+                $("#t2").show();
+                $("#show5").hide();
             }
+        })
+        return false;
+    });
 
-            $('#form3').on('submit', function() {
-            for ( instance in CKEDITOR.instances ) {
-                CKEDITOR.instances[instance].updateElement();
+    // Ticket Reply
+    $('#attachment').change(function() {
+        input = document.getElementById('attachment');
+        if (!input) {
+            alert("Um, couldn't find the fileinput element.");
+        } else if (!input.files) {
+            alert("This browser doesn't seem to support the `files` property of file inputs.");
+        } else if (!input.files[0]) {
+        } else {
+            $("#file_details").html("");
+            var total_size = 0;
+            for(i = 0; i < input.files.length; i++) {
+                file = input.files[i];
+                var supported_size = "{!! $max_size_in_bytes !!}";
+                var supported_actual_size = "{!! $max_size_in_actual !!}";
+                if(file.size < supported_size) {
+                    $("#file_details").append("<tr> <td> " + file.name + " </td><td> " + formatBytes(file.size) + "</td> </tr>");
+                } else {
+                    $("#file_details").append("<tr style='color:red;'> <td> " + file.name + " </td><td> " + formatBytes(file.size) + "</td> </tr>");
+                }
+                total_size += parseInt(file.size);
             }
-            var fd = new FormData(document.getElementById("form3"));
-            var reply_content = document.getElementById('reply_content').value;
-            if(reply_content) {
-                $("#reply_content_class").removeClass('has-error');
-                $("#alert23").hide();
+            if(total_size > supported_size) {
+                $("#total-size").append("<span style='color:red'>Your total file upload size is greater than "+ supported_actual_size +"</span>");
+                $("#replybtn").addClass('disabled');
+                $("#clear-file").show();
             } else {
-                var message = "<li>{!! Lang::get('lang.reply_content_is_a_required_field') !!}</li>";
-                $("#reply_content_class").addClass('has-error');
-                $("#alert23").show();
-                $('#message-danger2').html(message);
-                $("#show3").hide();
-                $("#t1").show();
-                return false;
+                $("#total-size").html("");
+                $("#replybtn").removeClass('disabled');
+                $("#clear-file").show();
             }
-            var reply_content = document.getElementById('reply_content').value;
-            $.ajax({
+        }
+    });
+            
+    function formatBytes(bytes,decimals) {
+        if(bytes == 0) return '0 Byte';
+        var k = 1000;
+        var dm = decimals + 1 || 3;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    $('#form3').on('submit', function() {
+        for ( instance in CKEDITOR.instances ) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+        var fd = new FormData(document.getElementById("form3"));
+        var reply_content = document.getElementById('reply_content').value;
+        if(reply_content) {
+            $("#reply_content_class").removeClass('has-error');
+            $("#alert23").hide();
+        } else {
+            var message = "<li>{!! Lang::get('lang.reply_content_is_a_required_field') !!}</li>";
+            $("#reply_content_class").addClass('has-error');
+            $("#alert23").show();
+            $('#message-danger2').html(message);
+            $("#show3").hide();
+            $("#t1").show();
+            return false;
+        }
+        var reply_content = document.getElementById('reply_content').value;
+        $.ajax({
             type: "POST",
-                    url: "../thread/reply/{{ $tickets->id }}",
-                    enctype: 'multipart/form-data',
-                    dataType: "json",
-                    data: fd,
-                    processData: false, // tell jQuery not to process the data
-                    contentType: false, // tell jQuery not to set contentType
-                    beforeSend: function() {
-                    $("#t1").hide();
-                    $("#show3").show();
+            url: "../thread/reply/{{ $tickets->id }}",
+            enctype: 'multipart/form-data',
+            dataType: "json",
+            data: fd,
+            processData: false, // tell jQuery not to process the data
+            contentType: false, // tell jQuery not to set contentType
+            beforeSend: function() {
+                $("#t1").hide();
+                $("#show3").show();
             },
             success: function(json) {
-                    location.reload();
+                location.reload();
                     //$('html, body').animate({ scrollTop: $("#heading").offset().top }, 500);
             },
-                    error: function(json) {
-                    $("#show3").hide();
-                    $("#t1").show();
-                    var res = "";
-                    $.each(json.responseJSON, function (idx, topic) {
-                    res += "<li>" + topic + "</li>";
-                    });
-                    $("#reply-response").html("<div class='alert alert-danger'><strong>Whoops!</strong> There were some problems with your input.<br><br><ul>" + res + "</ul></div>");
-                    //$('html, body').animate({ scrollTop: $("#heading").offset().top }, 500);
+            error: function(json) {
+                $("#show3").hide();
+                $("#t1").show();
+                var res = "";
+                $.each(json.responseJSON, function (idx, topic) {
+                res += "<li>" + topic + "</li>";
+                });
+                $("#reply-response").html("<div class='alert alert-danger'><strong>Whoops!</strong> There were some problems with your input.<br><br><ul>" + res + "</ul></div>");
+                //$('html, body').animate({ scrollTop: $("#heading").offset().top }, 500);
             }
-            })
-            return false;
+        })
+        return false;
     });
-// Surrender
-            $('#Surrender').on('click', function() {
-    $.ajax({
-    type: "GET",
+
+    // Surrender
+    $('#Surrender').on('click', function() {
+        $.ajax({
+            type: "GET",
             url: "../ticket/surrender/{{ $tickets->id }}",
             success: function(response) {
-
-            if (response == 1)
-            {
-            // alert('ticket has been un assigned');
-            var message = "{!! Lang::get('lang.you_have_unassigned_your_ticket') !!}";
+                if (response == 1) {
+                    // alert('ticket has been un assigned');
+                    var message = "{!! Lang::get('lang.you_have_unassigned_your_ticket') !!}";
                     $("#alert11").show();
                     $('#message-success1').html(message);
                     setInterval(function(){$("#dismiss11").trigger("click"); }, 2000);
                     // $("#refresh1").load( "http://localhost/faveo/public/thread/{{$tickets->id}}   #refresh1");
                     $('#surrender_button').hide();
-            }
-            else
-            {
-            var message = "{!! Lang::get('lang.for_some_reason_your_request_failed') !!}";
+                } else {
+                    var message = "{!! Lang::get('lang.for_some_reason_your_request_failed') !!}";
                     $("#alert13").show();
                     $('#message-danger1').html(message);
                     setInterval(function(){$("#dismiss13").trigger("click"); }, 2000);
                     // alert('fail');
                     // $( "#dismis4" ).trigger( "click" );
+                }
+                $("#dismis6").trigger("click");
             }
-            $("#dismis6").trigger("click");
-            }
-    })
-            return false;
+        })
+        return false;
     });
-            $("#search-user").on('submit', function(e) {
-    $.ajax({
-    type: "POST",
+
+    $("#search-user").on('submit', function(e) {
+        $.ajax({
+            type: "POST",
             url: "../search-user",
             dataType: "html",
             data: $(this).serialize(),
@@ -1935,63 +1939,65 @@ if ($thread->title != "") {
                 $('#hide1234').hide();
             },
             success: function(response) {
-            $('#show7').hide();
-                    $('#hide1234').show();
-                    $('#here').html(response);
-                    $("#recepients").load("../thread/{{$tickets->id}}   #recepients");
-                    $("#surrender22").load("../thread/{{$tickets->id}}   #surrender22");
-                    setTimeout(function() {
+                $('#show7').hide();
+                $('#hide1234').show();
+                $('#here').html(response);
+                $("#recepients").load("../thread/{{$tickets->id}}   #recepients");
+                $("#surrender22").load("../thread/{{$tickets->id}}   #surrender22");
+                setTimeout(function() {
                     // var link = document.querySelector('#load-inbox');
                     // if(link) {
                     //     link.click();
                     // }
-//                    $('#cc-close').trigger('click');
-                    }, 500);
+                    // $('#cc-close').trigger('click');
+                }, 500);
             }
-    })
-            return false;
+        })
+        return false;
     });
-            $("#add-user").on('submit', function(e) {
-    $.ajax({
-    type: "POST",
+
+    $("#add-user").on('submit', function(e) {
+        $.ajax({
+            type: "POST",
             url: "../add-user",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $('#show8').show();
-                    $('#hide12345').hide();
+                $('#show8').show();
+                $('#hide12345').hide();
             },
             success: function(response) {
-            $('#show8').hide();
-                    $('#hide12345').show();
-                    $('#here2').html(response);
-                    $("#recepients").load("../thread/{{$tickets->id}}   #recepients");
-                    $("#surrender22").load("../thread/{{$tickets->id}}   #surrender22");
-                    setTimeout(function() {
+                $('#show8').hide();
+                $('#hide12345').show();
+                $('#here2').html(response);
+                $("#recepients").load("../thread/{{$tickets->id}}   #recepients");
+                $("#surrender22").load("../thread/{{$tickets->id}}   #surrender22");
+                setTimeout(function() {
                     // var link = document.querySelector('#load-inbox');
                     // if(link) {
                     //     link.click();
                     // }
                     $('#cc-close').trigger('click');
-                    }, 500);
+                }, 500);
             }
-    })
-            return false;
+        })
+        return false;
     });
-            // checking merge
-            $('#MergeTickets').on('show.bs.modal', function (id) {
-    $.ajax({
-    type: "GET",
+
+    // checking merge
+    $('#MergeTickets').on('show.bs.modal', function (id) {
+        $.ajax({
+            type: "GET",
             url: "../check-merge-ticket/{{ $tickets->id }}",
             dataType: "html",
             data:$(this).serialize(),
             beforeSend: function() {
-            $("#merge_body").hide();
-                    $("#merge_loader").show();
+                $("#merge_body").hide();
+                $("#merge_loader").show();
             },
             success: function(response) {
-            if (response == 0) {
-            $("#merge_body").show();
+                if (response == 0) {
+                    $("#merge_body").show();
                     $("#merge-succ-alert").hide();
                     $("#merge-body-alert").show();
                     $("#merge-body-form").hide();
@@ -2000,41 +2006,41 @@ if ($thread->title != "") {
                     var message = "{{Lang::get('lang.no-tickets-to-merge')}}";
                     $("#merge-err-alert").show();
                     $('#message-merge-err').html(message);
-            } else {
-            $("#merge_body").show();
+                } else {
+                    $("#merge_body").show();
                     $("#merge-body-alert").hide();
                     $("#merge-body-form").show();
                     $("#merge_loader").hide();
                     $("#merge-btn").attr('disabled', false);
                     $("#merge_loader").hide();
                     $.ajax({
-                    url: "../get-merge-tickets/{{ $tickets->id}}",
-                            type: 'GET',
-                            data: $(this).serialize(),
-                            success: function(data) {
-
+                        url: "../get-merge-tickets/{{ $tickets->id}}",
+                        type: 'GET',
+                        data: $(this).serialize(),
+                        success: function(data) {
                             $('#select-merge-tickts').html(data);
-                            }
-                    // return false;
+                        }
+                        // return false;
                     });
+                }
             }
-            }
+        });
     });
-    });
-            //submit merging form
-            $('#merge-form').on('submit', function(){
-    $.ajax({
-    type: "POST",
+
+    //submit merging form
+    $('#merge-form').on('submit', function(){
+        $.ajax({
+            type: "POST",
             url: "../merge-tickets/{{ $tickets->id }}",
             dataType: "html",
             data: $(this).serialize(),
             beforeSend: function() {
-            $("#merge_body").hide();
-                    $("#merge_loader").show();
+                $("#merge_body").hide();
+                $("#merge_loader").show();
             },
             success: function(response) {
-            if (response == 0) {
-            $("#merge_body").show();
+                if (response == 0) {
+                    $("#merge_body").show();
                     $("#merge-succ-alert").hide();
                     $("#merge-body-alert").show();
                     $("#merge-body-form").hide();
@@ -2043,8 +2049,8 @@ if ($thread->title != "") {
                     var message = "{{Lang::get('lang.merge-error')}}";
                     $("#merge-err-alert").show();
                     $('#message-merge-err').html(message);
-            } else if (response == 2) {
-            $("#merge_body").show();
+                } else if (response == 2) {
+                    $("#merge_body").show();
                     $("#merge-succ-alert").hide();
                     $("#merge-body-alert").show();
                     $("#merge-body-form").hide();
@@ -2053,8 +2059,8 @@ if ($thread->title != "") {
                     var message = "{{Lang::get('lang.merge-error2')}}";
                     $("#merge-err-alert").show();
                     $('#message-merge-err').html(message);
-            } else {
-            $("#merge_body").show();
+                } else {
+                    $("#merge_body").show();
                     $("#merge-err-alert").hide();
                     $("#merge-body-alert").show();
                     $("#merge-body-form").hide();
@@ -2069,97 +2075,100 @@ if ($thread->title != "") {
                     var message = "{{Lang::get('lang.merge-success')}}";
                     $("#merge-succ-alert").show();
                     $('#message-merge-succ').html(message);
+                }
             }
-            }
-    })
-            return false;
+        })
+        return false;
     });
-    });
-            function remove_collaborator(id) {
-            var data = id;
-                    $.ajax({
-                    headers: {
-                    'X-CSRF-Token': $('meta[name="_token"]').attr('content'),
-                    },
-                            type: "POST",
-                            url: "../remove-user",
-                            dataType: "html",
-                            data: {data1:data},
-                            success: function(response) {
-                            if (response == 1) {
-                            $("#recepients").load("../thread/{{$tickets->id}}   #recepients");
-                            };
-                                    // $('#here2').html(response);
 
-                                    // $("#surrender22").load("../thread/{{$tickets->id}}   #surrender22");
-                            }
-                    })
-                    return false;
+    });
+
+    function remove_collaborator(id) {
+        var data = id;
+        $.ajax({
+            headers: {
+                'X-CSRF-Token': $('meta[name="_token"]').attr('content'),
+            },
+            type: "POST",
+            url: "../remove-user",
+            dataType: "html",
+            data: {data1:data},
+            success: function(response) {
+                if (response == 1) {
+                    $("#recepients").load("../thread/{{$tickets->id}}   #recepients");
+                };
+                // $('#here2').html(response);
+
+                // $("#surrender22").load("../thread/{{$tickets->id}}   #surrender22");
             }
+        })
+        return false;
+    }
 
     $(document).ready(function() {
 
-    var Vardata = "";
-            var count = 0;
-            $(".select2").on('select2:select', function(){
-    parentAjaxCall();
-    });
-            $(".select2").on('select2:unselect', function(){
-    parentAjaxCall();
-    });
-    function parentAjaxCall(){
+        var Vardata = "";
+        var count = 0;
+        $(".select2").on('select2:select', function(){
+            parentAjaxCall();
+        });
+        $(".select2").on('select2:unselect', function(){
+            parentAjaxCall();
+        });
+
+        function parentAjaxCall(){
             // alert();
             var arr = $("#select-merge-tickts").val();
-        if (arr == null) {
-            document.getElementById("select-merge-parent").innerHTML = "<option value='{{$tickets->id}}'><?php
-$ticket_data = App\Model\helpdesk\Ticket\Ticket_Thread::select('title')->where('ticket_id', "=", $tickets->id)->first();
-echo $ticket_data->title;
-?></option>"
-        } else {
-            $.ajax({
-            type: "GET",
+            if (arr == null) {
+                document.getElementById("select-merge-parent").innerHTML = "<option value='{{$tickets->id}}'><?php
+                $ticket_data = App\Model\helpdesk\Ticket\Ticket_Thread::select('title')->where('ticket_id', "=", $tickets->id)->first();
+                echo $ticket_data->title;
+                ?></option>"
+            } else {
+                $.ajax({
+                    type: "GET",
                     url: "../get-parent-tickets/{{ $tickets->id }}",
                     dataType: "html",
                     data:{data1:arr},
                     beforeSend: function() {
-                    $("#parent-loader").show();
-                            $("#parent-body").hide();
+                        $("#parent-loader").show();
+                        $("#parent-body").hide();
                     },
                     success: function(data) {
-                    $("#parent-loader").hide();
-                            $("#parent-body").show();
-                            // $("#select-merge-parent").focus();
-                            $('#select-merge-parent').html(data);
-                            // $( this ).off( event );
+                        $("#parent-loader").hide();
+                        $("#parent-body").show();
+                        // $("#select-merge-parent").focus();
+                        $('#select-merge-parent').html(data);
+                        // $( this ).off( event );
                     }
-            });
+                });
+            }
         }
 
-    }
         var locktime = '<?php echo $var->collision_avoid; ?>' * 60 * 1000;
         var ltf = '<?php echo $var->lock_ticket_frequency;?>';
         if (locktime > 0 && ltf != 0) {
             lockAjaxCall(locktime);
             if (ltf == 2) {
                 var myVar = setInterval(function() {// to call ajax for ticket lock repeatedly after defined lock time interval
-                lockAjaxCall(locktime);
+                    lockAjaxCall(locktime);
                     return false;
                 }, locktime);
                 $(window).on("blur focus", function(e) {
                     var prevType = $(this).data("prevType");
                     if (prevType != e.type) {   //  reduce double fire issues
                         switch (e.type) {
-                        case "blur":
-                            // do work
-                            setTimeout(function(){
-                                clearInterval(myVar);
-                                $("#myModalLabel").html("{!! Lang::get('lang.alert') !!}");
-                                $("#custom-alert-body").html("{!! Lang::get('lang.ticket-lock-inactive') !!}");
-                                $("#myModal").css("display", "block");
-                            }, locktime);
-                            break;
-                        case "focus":
-                            break;
+                            case "blur":
+                                // do work
+                                setTimeout(function(){
+                                    clearInterval(myVar);
+                                    $("#myModalLabel").html("{!! Lang::get('lang.alert') !!}");
+                                    $("#custom-alert-body").html("{!! Lang::get('lang.ticket-lock-inactive') !!}");
+                                    $("#myModal").css("display", "block");
+                                }, locktime);
+                                break;
+                            case "focus":
+                                break;
                         }
                     }
 
@@ -2167,65 +2176,67 @@ echo $ticket_data->title;
                 });
             }
         }
+
     });
-//ajax call to check ticket and lock ticket
-            function lockAjaxCall(locktime){
-            $.ajax({
+
+    //ajax call to check ticket and lock ticket
+    function lockAjaxCall(locktime){
+        $.ajax({
             type: "GET",
-                    url: "{{URL::route('lock',$tickets->id)}}",
-                    dataType: "html",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                    if (response == 2) {
+            url: "{{URL::route('lock',$tickets->id)}}",
+            dataType: "html",
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response == 2) {
                     // alert(response);
                     // var message = "{{Lang::get('lang.access-ticket')}}"+locktime/(60*1000)
                     // +"{{Lang::get('lang.minutes')}}";
                     $("#alert22").hide();
-                            $("#hide2").load("../thread/{{$tickets->id}}  #hide2");
-                            $("#refresh").load("../thread/{{$tickets->id}}  #refresh");
-                            $("#refresh1").load("../thread/{{$tickets->id}}  #refresh1");
-                            $("#refresh3").load("../thread/{{$tickets->id}}  #refresh3");
-                            $("#t5").load("../thread/{{$tickets->id}}  #t5");
-                            // $("#alert21").show();
-                            // $('#message-success2').html(message);
-                            $('#replybtn').attr('disabled', false);
-                            // setInterval(function(){$("#alert21").hide(); },8000);  
-                    } else if (response == 1 || response == 4){
+                    $("#hide2").load("../thread/{{$tickets->id}}  #hide2");
+                    $("#refresh").load("../thread/{{$tickets->id}}  #refresh");
+                    $("#refresh1").load("../thread/{{$tickets->id}}  #refresh1");
+                    $("#refresh3").load("../thread/{{$tickets->id}}  #refresh3");
+                    $("#t5").load("../thread/{{$tickets->id}}  #t5");
+                    // $("#alert21").show();
+                    // $('#message-success2').html(message);
+                    $('#replybtn').attr('disabled', false);
+                    // setInterval(function(){$("#alert21").hide(); },8000);  
+                } else if (response == 1 || response == 4){
                     // alert(response);
                     // var message = "{{Lang::get('lang.access-ticket')}}"+locktime/(60*1000)
                     // +"{{Lang::get('lang.minutes')}}";
                     $("#alert22").hide();
-                            $("#refresh").load("../thread/{{$tickets->id}}  #refresh");
-                            // $("#refresh1").load("../thread/{{$tickets->id}}  #refresh1");
-                            $("#refresh3").load("../thread/{{$tickets->id}}  #refresh3");
-                            $("#t5").load("../thread/{{$tickets->id}}  #t5");
-                            // $("#alert21").show();
-                            // $('#message-success2').html(message);
-                            $('#replybtn').attr('disabled', false);
-                            // setInterval(function(){$("#alert21").hide(); },8000); 
-                    } else {
+                    $("#refresh").load("../thread/{{$tickets->id}}  #refresh");
+                    // $("#refresh1").load("../thread/{{$tickets->id}}  #refresh1");
+                    $("#refresh3").load("../thread/{{$tickets->id}}  #refresh3");
+                    $("#t5").load("../thread/{{$tickets->id}}  #t5");
+                    // $("#alert21").show();
+                    // $('#message-success2').html(message);
+                    $('#replybtn').attr('disabled', false);
+                    // setInterval(function(){$("#alert21").hide(); },8000); 
+                } else {
                     var message = response;
-                            $("#alert22").show();
-                            $('#message-warning2').html(message);
-                            $('#replybtn').attr('disabled', true);
-                            //setInterval(function(){$("#alert23").hide(); },10000);
-                    }
-                    }
-            })
+                    $("#alert22").show();
+                    $('#message-warning2').html(message);
+                    $('#replybtn').attr('disabled', true);
+                    //setInterval(function(){$("#alert23").hide(); },10000);
+                }
             }
+        })
+    }
 
     $(function() {
-
-    $('h5').html('<span class="stars">' + parseFloat($('input[name=amount]').val()) + '</span>');
-            $('span.stars').stars();
-            $('h4').html('<span class="stars2">' + parseFloat($('input[name=amt]').val()) + '</span>');
-            $('span.stars2').stars();
+        $('h5').html('<span class="stars">' + parseFloat($('input[name=amount]').val()) + '</span>');
+        $('span.stars').stars();
+        $('h4').html('<span class="stars2">' + parseFloat($('input[name=amt]').val()) + '</span>');
+        $('span.stars2').stars();
     });
-            $.fn.stars = function() {
-            return $(this).each(function() {
+            
+    $.fn.stars = function() {
+        return $(this).each(function() {
             $(this).html($('<span />').width(Math.max(0, (Math.min(5, parseFloat($(this).html())))) * 16));
-            });
-            }
+        });
+    }
 
     function addCannedResponse() {
         var selectedResponse = document.getElementById( "select" );
@@ -2241,5 +2252,6 @@ echo $ticket_data->title;
             }
         }
     }
+
 </script>
 @stop

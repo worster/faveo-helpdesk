@@ -101,7 +101,7 @@ var filterClick = 0;
                             error: function (xhr, ajaxOptions, thrownError) {
                                 $('.loader1').css('display','none');
                                 $('.loader').css('display','none');
-                                if (xhr.status == 403) {
+                                // if (xhr.status == 403) {
                                     $('#d1').prop('disabled', false);
                                     $("#hide2").show();
                                     $("#show2").hide();
@@ -110,7 +110,7 @@ var filterClick = 0;
                                     var message = JSON.parse(xhr.responseText);
                                     $(".error-message, #get-danger").html(message.message[0]);
                                     $(".alert-danger").show();
-                                }
+                                // }
                             }
                         })
                         return false;
@@ -123,7 +123,17 @@ var filterClick = 0;
             });
             
             function changeStatus(id, name) {
-                $('#myModalLabel').html('{{Lang::get("lang.change-ticket-status-to")}}' + name);
+                c_status = "{!! Lang::get('lang.open') !!}";
+                if (id == 2) {
+                    c_status = "{!! Lang::get('lang.resolve') !!}";
+                } else if (id == 3) {
+                    c_status = "{!! Lang::get('lang.close') !!}";
+                } else if (id == 5) {
+                    c_status = "{!! Lang::get('lang.delete') !!}";
+                } else if (id == 'hard-delete') {
+                    c_status = "{!! Lang::get('lang.clean-up') !!}";
+                }
+                $('#myModalLabel').html('{{Lang::get("lang.change-ticket-status-to")}}' + '[' + c_status + ']');
                 var msg = "{{Lang::get('lang.confirm-to-proceed')}}";
                 var values = getValues();
                 if (values == "") {
@@ -131,18 +141,7 @@ var filterClick = 0;
                     $('.yes').html("{{Lang::get('lang.ok')}}");
                     $('#myModalLabel').html("{{Lang::get('lang.alert')}}");
                 } else {
-                    c_status = "Open";
-                    if(id == 2){
-                        c_status = "Resolve";
-                    } else if (id == 3) {
-                        c_status = "Close";
-                    } else if(id == 5) {
-                        c_status = "Delete";
-                    } else if(id == 'hard-delete') {
-                        c_status = "Delete forever";
-                    }
-
-                    $('.yes').html("Yes");
+                    $('.yes').html('{{Lang::get("lang.yes")}}');
                 }
                 $('#custom-alert-body').html(msg);
                 $("#myModal").css("display", "block");
@@ -153,7 +152,7 @@ var filterClick = 0;
                     e.preventDefault();
                     changeStatus('hard-delete', '{{Lang::get("lang.clean-forever")}}');
                 }
-                $('#hard-delete').val('Delete forever')
+                $('#hard-delete').val("{!! Lang::get('lang.clean-up'); !!}");
             });
 
             function someFunction(id) {

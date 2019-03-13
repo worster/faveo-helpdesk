@@ -18,6 +18,9 @@ class FolderController extends LfmController
     {
         $folder_types = [];
         $root_folders = [];
+        $user_folders = [];
+
+        $lfm_share_path = [];
 
         if (parent::allowMultiUser()) {
             $folder_types['user'] = 'root';
@@ -43,8 +46,17 @@ class FolderController extends LfmController
             ]);
         }
 
+        if ($root_folders && !empty($root_folders)) {
+            foreach ($root_folders[0]->children as $folder) {
+                $user_folders[] = $folder->name;
+            }
+        }
+
         return view('laravel-filemanager::tree')
-            ->with(compact('root_folders'));
+            ->with(compact('root_folders'))
+            ->with('directories', $user_folders)
+            ->with('dirs', $user_folders)
+            ->with('shares', $lfm_share_path);
     }
 
     /**

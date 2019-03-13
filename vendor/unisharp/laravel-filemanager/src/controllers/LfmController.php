@@ -25,7 +25,8 @@ class LfmController extends Controller
      */
     public function show()
     {
-        return view('laravel-filemanager::index');
+        $working_dir = $this->rootFolder('user');
+        return view('laravel-filemanager::index', compact('working_dir'));
     }
 
     public function getErrors()

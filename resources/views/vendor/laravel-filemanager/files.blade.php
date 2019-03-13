@@ -36,12 +36,12 @@
                 <div class="col-sm-6 col-md-2 img-row">
 
                     <div class="thumbnail thumbnail-img text-center" data-id="{{ $file_name }}" id="img_thumbnail_{{ $key }}">
-                        <i class="fa {{ $file['icon'] }} fa-5x" style="height:200px;cursor:pointer;padding-top:60px;" onclick="useFile('{{ $file_name }}')"></i>
+                        <i class="fa {{ $file['icon'] }} fa-5x" style="height:200px;cursor:pointer;padding-top:60px;" onclick="useFile('{{ $file->url }}')"></i>
                     </div>
 
                     <div class="caption text-center">
                         <div class="btn-group ">
-                            <button type="button" onclick="useFile('{{ $file_name }}')" class="btn btn-default btn-xs">
+                            <button type="button" onclick="useFile('{{ $file->url }}')" class="btn btn-default btn-xs">
                                 {{ str_limit($file_name, $limit = 10, $end = '...') }}
                             </button>
                             <button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-expanded="false">
@@ -50,7 +50,7 @@
                             </button>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="javascript:rename('{{ $file_name }}')">{{ Lang::get('laravel-filemanager::lfm.menu-rename') }}</a></li>
-                                <li><a href="javascript:fileView('{{ $file_name }}')">{{ Lang::get('laravel-filemanager::lfm.menu-view') }}</a></li>
+                                <li><a href="javascript:fileView('{{ $file->url }}', true)">{{ Lang::get('laravel-filemanager::lfm.menu-view') }}</a></li>
                                 <li><a href="javascript:download('{{ $file_name }}')">{{ Lang::get('laravel-filemanager::lfm.menu-download') }}</a></li>
                                 <li class="divider"></li>
                                 {{--<li><a href="javascript:notImp()">Rotate</a></li>--}}

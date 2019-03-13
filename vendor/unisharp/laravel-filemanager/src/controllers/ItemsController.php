@@ -16,14 +16,19 @@ class ItemsController extends LfmController
     {
         $path = parent::getCurrentPath();
         $sort_type = request('sort_type');
+        $type = request('type');
 
         $files = parent::sortFilesAndDirectories(parent::getFilesWithInfo($path), $sort_type);
         $directories = parent::sortFilesAndDirectories(parent::getDirectories($path), $sort_type);
+        $thumb_url   = parent::removeIndexPath(parent::getThumbUrl());
 
         return [
             'html' => (string) view($this->getView())->with([
+                'type'        => $type,
                 'files'       => $files,
+                'file_info'   => $files,
                 'directories' => $directories,
+                'thumb_url'   => $thumb_url,
                 'items'       => array_merge($directories, $files),
             ]),
             'working_dir' => parent::getInternalPath($path),
