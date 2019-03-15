@@ -115,125 +115,133 @@
                         @else
                         <?php \Event::fire('service.desk.agent.topbar', array()); ?>
                         @endif
-
                         <ul class="nav navbar-nav navbar-right">
                             @if($auth_user_role == 'admin')
                             <li><a href="{{url('admin')}}">{!! Lang::get('lang.admin_panel') !!}</a></li>
-
                             @endif
                             @include('themes.default1.update.notification')
                             <!-- User Account: style can be found in dropdown.less -->
                             <li class="dropdown notifications-menu" id="myDropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="myFunction()">
                                     <i class="fa fa-bell-o"></i>
-                                    <span class="label label-danger" id="count">{!! $notifications->count() !!}</span>
+                                    <span class="label label-danger" id="count">{!! $unread_notifications->count() !!}</span>
                                 </a>
                                 <ul class="dropdown-menu" style="width:500px">
-
                                     <div id="alert11" class="alert alert-success alert-dismissable" style="display:none;">
                                         <button id="dismiss11" type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                                         <h4><i class="icon fa fa-check"></i>Alert!</h4>
                                         <div id="message-success1"></div>
                                     </div>
-
                                     <li id="refreshNote">
-
-                                    <li class="header">You have {!! $notifications->count() !!} notifications. <a class="pull-right" id="read-all" href="#">Mark all as read.</a></li>
-
-                                    <ul class="menu">
-
-                                        @if($notifications->count())
-                                        @foreach($notifications->orderBy('created_at', 'desc')->get()->take(10) as $notification)
-
-                                        @if($notification->notification->type->type == 'registration')
-                                        @if($notification->is_read == 1)
-                                        <li class="task" style="list-style: none; margin-left: -30px;"><span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="user-image"  style="width:6%;height: 5%" alt="User Image" />
-                                                <a href="{!! route('user.show', $notification->notification->model_id) !!}" id="{{$notification -> notification_id}}" class='noti_User'>
-                                                    {!! $notification->notification->type->message !!}
-                                                </a></span>
+                                        <li class="header">
+                                            You have {!! $notifications->count() !!} notifications. 
+                                            <a class="pull-right" id="read-all" href="#">Mark all as read.</a>
                                         </li>
-                                        @else
-                                        <li style="list-style: none; margin-left: -30px;"><span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="user-image"  style="width:6%;height: 5%" alt="User Image" />
-                                                <a href="{!! route('user.show', $notification->notification->model_id) !!}" id="{{$notification -> notification_id}}" class='noti_User'>
-                                                    {!! $notification->notification->type->message !!}
-                                                </a></span>
-                                        </li>
-                                        @endif
-                                        @else
-                                        @if($notification->is_read == 1)
-                                        <li  class="task" style="list-style: none;margin-left: -30px"><span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="img-circle"  style="width:6%;height: 5%" alt="User Image" />
-                                                <a href="{!! route('ticket.thread', $notification->notification->model_id) !!}" id='{{ $notification -> notification_id}}' class='noti_User'>
-                                                    {!! $notification->notification->type->message !!} with id "{!!$notification->notification->model->ticket_number!!}"
-                                                </a></span>
-                                        </li>
-                                        @elseif($notification->notification->model)
-                                        <li style="list-style: none;margin-left: -30px"><span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="img-circle"  style="width:6%;height: 5%" alt="User Image" />
-                                                <a href="{!! route('ticket.thread', $notification->notification->model_id) !!}" id='{{ $notification -> notification_id}}' class='noti_User'>
-                                                    {!! $notification->notification->type->message !!} with id "{!!$notification->notification->model->ticket_number!!}"
-                                                </a></span>
-                                        </li>
-                                        @endif
-                                        @endif
-                                        @endforeach
-                                        @endif
-                                    </ul>
+                                        <ul class="menu">
+                                            @if($notifications->count())
+                                                @foreach($notifications->orderBy('created_at', 'desc')->get()->take(10) as $notification)
+                                                    @if($notification->notification->type->type == 'registration')
+                                                        @if($notification->is_read == 1)
+                                                        <li class="task" style="list-style: none; margin-left: -30px;">
+                                                            <span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="user-image"  style="width:6%;height: 5%" alt="User Image" />
+                                                                <a href="{!! route('user.show', $notification->notification->model_id) !!}" id="{{$notification -> notification_id}}" class='noti_User'>
+                                                                    {!! $notification->notification->type->message !!}
+                                                                </a>
+                                                            </span>
+                                                        </li>
+                                                        @else
+                                                        <li style="list-style: none; margin-left: -30px;">
+                                                            <span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="user-image"  style="width:6%;height: 5%" alt="User Image" />
+                                                                <a href="{!! route('user.show', $notification->notification->model_id) !!}" id="{{$notification -> notification_id}}" class='noti_User'>
+                                                                    {!! $notification->notification->type->message !!}
+                                                                </a>
+                                                            </span>
+                                                        </li>
+                                                        @endif
+                                                    @else
+                                                        @if($notification->is_read == 1)
+                                                        <li  class="task" style="list-style: none;margin-left: -30px">
+                                                            <span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="img-circle"  style="width:6%;height: 5%" alt="User Image" />
+                                                                <a href="{!! route('ticket.thread', $notification->notification->model_id) !!}" id='{{ $notification -> notification_id}}' class='noti_User'>
+                                                                    {!! $notification->notification->type->message !!} with id "{!!$notification->notification->model->ticket_number!!}"
+                                                                </a>
+                                                            </span>
+                                                        </li>
+                                                        @elseif($notification->notification->model)
+                                                        <li style="list-style: none;margin-left: -30px">
+                                                            <span>&nbsp<img src="{{$notification -> users -> profile_pic}}" class="img-circle"  style="width:6%;height: 5%" alt="User Image" />
+                                                                <a href="{!! route('ticket.thread', $notification->notification->model_id) !!}" id='{{ $notification -> notification_id}}' class='noti_User'>
+                                                                    {!! $notification->notification->type->message !!} with id "{!!$notification->notification->model->ticket_number!!}"
+                                                                </a>
+                                                            </span>
+                                                        </li>
+                                                        @endif
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        </ul>
+                                    </li>
+                                    <li class="footer no-border">
+                                        <div class="col-md-5"></div>
+                                        <div class="col-md-2">
+                                            <img src="{{asset("lb-faveo/media/images/gifloader.gif")}}" style="display: none;" id="notification-loader">
+                                        </div>
+                                        <div class="col-md-5"></div>
+                                    </li>
+                                    <li class="footer">
+                                        <a href="{{ url('notifications-list')}}">View all</a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="footer no-border"><div class="col-md-5"></div><div class="col-md-2">
-                                    <img src="{{asset("lb-faveo/media/images/gifloader.gif")}}" style="display: none;" id="notification-loader">
-                                </div><div class="col-md-5"></div></li>
-                            <li class="footer"><a href="{{ url('notifications-list')}}">View all</a>
-                            </li>
-                        </ul>
-                        </li>
-                        <li class="dropdown">
-                            <?php $src = Lang::getLocale().'.png'; ?>
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true"><img src="{{asset("lb-faveo/flags/$src")}}"></img> &nbsp;<span class="caret"></span></a>
-                            <ul class="dropdown-menu" role="menu">
-                                @foreach($langs as $key => $value)
-                                            <?php $src = $key.".png"; ?>
-                                            <li><a href="#" id="{{$key}}" onclick="changeLang(this.id)"><img src="{{asset("lb-faveo/flags/$src")}}"></img>&nbsp;{{$value[0]}}&nbsp;
+                            <li class="dropdown">
+                                <?php $src = Lang::getLocale().'.png'; ?>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true"><img src="{{asset("lb-faveo/flags/$src")}}"></img> &nbsp;<span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    @foreach($langs as $key => $value)
+                                    <?php $src = $key.".png"; ?>
+                                    <li>
+                                        <a href="#" id="{{$key}}" onclick="changeLang(this.id)">
+                                            <img src="{{asset("lb-faveo/flags/$src")}}"></img>
+                                            &nbsp;{{$value[0]}}&nbsp;
                                             @if(Lang::getLocale() == "ar")
                                             &rlm;
                                             @endif
-                                            ({{$value[1]}})</a></li>
-                                @endforeach      
-                            </ul>
-                        </li>
-                        <!-- User Account: style can be found in dropdown.less -->
-                        <li class="dropdown user user-menu">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                @if($auth_user_id)
-                                <img src="{{$auth_user_profile_pic}}"class="user-image" alt="User Image"/>
-                                <span class="hidden-xs">{{$auth_name}}</span>
-                                @endif
-                            </a>
-                            <ul class="dropdown-menu">
-                                <!-- User image -->
-                                <li class="user-header"  style="background-color:#343F44;">
-                                    <img src="{{$auth_user_profile_pic}}" class="img-circle" alt="User Image" />
-                                    <p>
-                                        {{$auth_name}} - {{$auth_user_role}}
-                                        <small></small>
-                                    </p>
-                                </li>
-                                <!-- Menu Footer-->
-                                <li class="user-footer" style="background-color:#1a2226;">
-                                    <div class="pull-left">
-                                        <a href="{{URL::route('profile')}}" class="btn btn-info btn-sm"><b>{!! Lang::get('lang.profile') !!}</b></a>
-                                    </div>
-                                    <div class="pull-right">
-                                        <a href="{{url('auth/logout')}}" class="btn btn-danger btn-sm"><b>{!! Lang::get('lang.sign_out') !!}</b></a>
-                                    </div>
-                                </li>
-
-                            </ul>
-
-                        </li>
-
+                                            ({{$value[1]}})
+                                        </a>
+                                    </li>
+                                    @endforeach      
+                                </ul>
+                            </li>
+                            <!-- User Account: style can be found in dropdown.less -->
+                            <li class="dropdown user user-menu">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    @if($auth_user_id)
+                                    <img src="{{$auth_user_profile_pic}}"class="user-image" alt="User Image"/>
+                                    <span class="hidden-xs">{{$auth_name}}</span>
+                                    @endif
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <!-- User image -->
+                                    <li class="user-header"  style="background-color:#343F44;">
+                                        <img src="{{$auth_user_profile_pic}}" class="img-circle" alt="User Image" />
+                                        <p>
+                                            {{$auth_name}} - {{$auth_user_role}}
+                                            <small></small>
+                                        </p>
+                                    </li>
+                                    <!-- Menu Footer-->
+                                    <li class="user-footer" style="background-color:#1a2226;">
+                                        <div class="pull-left">
+                                            <a href="{{URL::route('profile')}}" class="btn btn-info btn-sm"><b>{!! Lang::get('lang.profile') !!}</b></a>
+                                        </div>
+                                        <div class="pull-right">
+                                            <a href="{{url('auth/logout')}}" class="btn btn-danger btn-sm"><b>{!! Lang::get('lang.sign_out') !!}</b></a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
-
                     </div>
-
                 </nav>
             </header>
             <!-- Left side column. contains the logo and sidebar -->

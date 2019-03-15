@@ -51,9 +51,12 @@ class AgentLayout
     public function compose(View $view)
     {
         $notifications = \App\Http\Controllers\Common\NotificationController::getNotifications();
+        $unread_notifications = \App\Http\Controllers\Common\NotificationController::getUnreadNotifications();
+
         $view->with([
             'company'            => $this->company,
             'notifications'      => $notifications,
+            'unread_notifications' => $unread_notifications,
             'myticket'           => $this->myTicket(),
             'unassigned'         => $this->unassigned(),
             'followup_ticket'    => $this->followupTicket(),

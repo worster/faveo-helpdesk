@@ -168,4 +168,16 @@ class NotificationController extends Controller
 
         return $notifications;
     }
+
+    /**
+     * get the page to list the notifications unread.
+     *
+     * @return response
+     */
+    public static function getUnreadNotifications()
+    {
+        $notifications = NotificationController::getNotifications()->where('is_read', '=', 0);
+
+        return $notifications;
+    }
 }
