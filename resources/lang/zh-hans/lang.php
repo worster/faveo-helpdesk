@@ -661,7 +661,7 @@ return [
     'form_name'                               => '表单名称',
     'view_this_form'                          => '查看表单',
     'delete_from'                             => '删除表单',
-    'are_you_sure_you_want_to_delete'         => '你确信你想要删除表单吗',
+    'are_you_sure_you_want_to_delete'         => '你确信你想要删除它吗',
     'close'                                   => '关闭',
     'resolve'                                 => '解决',
     'instructions'                            => '说明',

@@ -17,6 +17,8 @@ use Exception;
 use Lang;
 use Redirect;
 
+use Ramsey\Uuid\Uuid;
+
 /**
  * CategoryController
  * This controller is used to CRUD category.
@@ -89,8 +91,8 @@ class CategoryController extends Controller
                         /* add column Actions */
                         /* there are action buttons and modal popup to delete a data column */
                         ->addColumn('Actions', function ($model) {
-                            return '<span  data-toggle="modal" data-target="#deletecategory'.$model->slug.'"><a href="#" ><button class="btn btn-danger btn-xs"></a>'.\Lang::get('lang.delete').'</button></span>&nbsp;<a href=category/'.$model->id.'/edit class="btn btn-warning btn-xs">'.\Lang::get('lang.edit').'</a>&nbsp;<a href=article-list class="btn btn-primary btn-xs">'.\Lang::get('lang.view').'</a>
-				<div class="modal fade" id="deletecategory'.$model->slug.'">
+                            return '<span  data-toggle="modal" data-target="#deletecategory'.$model->id.'"><a href="#" ><button class="btn btn-danger btn-xs"></a>'.\Lang::get('lang.delete').'</button></span>&nbsp;<a href=category/'.$model->id.'/edit class="btn btn-warning btn-xs">'.\Lang::get('lang.edit').'</a>&nbsp;<a href=article-list class="btn btn-primary btn-xs">'.\Lang::get('lang.view').'</a>
+				<div class="modal fade" id="deletecategory'.$model->id.'">
         			<div class="modal-dialog">
             			<div class="modal-content">
                 			<div class="modal-header">
@@ -143,7 +145,10 @@ class CategoryController extends Controller
     {
         /* Get the whole request from the form and insert into table via model */
         $sl = $request->input('name');
-        $slug = str_slug($sl, '-');
+        $slug = ""; // str_slug($sl, '-');
+        if (!$slug) { // sometimes we may failed to get slug from category name 
+            $slug = 'slug-' . Uuid::uuid1();
+        }
         $category->slug = $slug;
         // send success message to index page
         try {
